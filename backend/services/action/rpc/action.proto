@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+package action;
+option go_package = "./action";
+
+// Action Service - 行动逻辑服务
+service Action {
+  // 调度行动 - 由定时任务调用，触发分身行动
+  rpc ScheduleAction(ScheduleActionRequest) returns (ScheduleActionResponse);
+
+  // 计算行动意图 - 计算 6 种行为的得分
+  rpc CalculateActionIntent(CalculateActionIntentRequest) returns (CalculateActionIntentResponse);
+
+  // 获取行动历史
+  rpc GetActionHistory(GetActionHistoryRequest) returns (GetActionHistoryResponse);
+
+  // 获取最近一次行动
+  rpc GetLastAction(GetLastActionRequest) returns (GetLastActionResponse);
+}
+
+// ========== 调度行动 ==========
+
+message ScheduleActionRequest {
+  int64 avatar_id = 1;  // 分身ID
+}
+
+message ScheduleActionResponse {
+  ActionLog action = 1;  // 生成的行动记录
+}
+
+// ========== 计算行动意图 ==========
+
+message CalculateActionIntentRequest {
+  int64 avatar_id = 1;  // 分身ID
+}
+
+message CalculateActionIntentResponse {
+  repeated ActionIntent intents = 1;  // 6 种行为的意图得分
+  string selected_action = 2;         // 选中的行为类型
+}
+
+message ActionIntent {
+  string action_type = 1;  // 行为类型: exploration, social, study, creative, rest, play
+  float score = 2;         // 得分 0-100
+  string reason = 3;       // 计算理由
+}
+
+// ========== 获取行动历史 ==========
+
+message GetActionHistoryRequest {
+  int64 avatar_id = 1;   // 分身ID
+  int32 page = 2;        // 页码
+  int32 page_size = 3;   // 每页数量
+}
+
+message GetActionHistoryResponse {
+  repeated ActionLog actions = 1;  // 行动记录列表
+  int64 total = 2;                 // 总数
+}
+
+// ========== 获取最近一次行动 ==========
+
+message GetLastActionRequest {
+  int64 avatar_id = 1;  // 分身ID
+}
+
+message GetLastActionResponse {
+  ActionLog action = 1;  // 最近一次行动记录
+}
+
+// ========== 数据模型 ==========
+
+message ActionLog {
+  int64 id = 1;
+  int64 avatar_id = 2;
+  string action_type = 3;      // 行为类型: exploration, social, study, creative, rest, play
+  int64 scene_id = 4;          // 场景ID
+  string scene_name = 5;       // 场景名称
+  float intent_score = 6;      // 意图得分
+  string trigger_reason = 7;   // 触发原因
+  int64 event_id = 8;          // 关联的事件ID（可选）
+  int64 created_at = 9;        // 创建时间
+}
