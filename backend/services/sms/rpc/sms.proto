@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package sms;
+option go_package = "./sms";
+
+// 短信服务
+service Sms {
+  // 发送验证码
+  rpc SendCode(SendCodeRequest) returns (SendCodeResponse);
+
+  // 验证验证码
+  rpc VerifyCode(VerifyCodeRequest) returns (VerifyCodeResponse);
+}
+
+// 发送验证码请求
+message SendCodeRequest {
+  string phone = 1;      // 手机号
+  string scene = 2;      // 场景: login, register
+}
+
+// 发送验证码响应
+message SendCodeResponse {
+  bool success = 1;      // 是否成功
+  string message = 2;    // 消息
+}
+
+// 验证验证码请求
+message VerifyCodeRequest {
+  string phone = 1;      // 手机号
+  string code = 2;       // 验证码
+}
+
+// 验证验证码响应
+message VerifyCodeResponse {
+  bool valid = 1;        // 是否有效
+  string message = 2;    // 消息
+}
