@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package oss;
+option go_package = "./oss";
+
+// OSS 对象存储服务
+service Oss {
+  // 获取上传 Token（包含 policy 和 signature）
+  rpc GetUploadToken(GetUploadTokenRequest) returns (GetUploadTokenResponse);
+
+  // 完成上传（验证并返回文件 URL）
+  rpc CompleteUpload(CompleteUploadRequest) returns (CompleteUploadResponse);
+}
+
+// 获取上传 Token 请求
+message GetUploadTokenRequest {
+  string service_name = 1;  // 服务名称: avatar, banner, post
+  string file_name = 2;     // 文件名
+  int64 user_id = 3;        // 用户 ID
+}
+
+// 获取上传 Token 响应
+message GetUploadTokenResponse {
+  string host = 1;          // OSS 上传地址
+  string accessid = 2;      // AccessKeyId
+  string policy = 3;        // 上传策略（Base64）
+  string signature = 4;     // 签名
+  string dir = 6;           // 文件目录前缀
+  int64 expire = 7;         // 过期时间戳
+  string domain = 8;        // 文件访问域名
+  string complete_token = 9; // 完成上传的验证 Token
+}
+
+// 完成上传请求
+message CompleteUploadRequest {
+  string service_name = 1;  // 服务名称
+  string key = 2;           // 文件 Key（上传后的完整路径）
+  int64 user_id = 3;        // 用户 ID
+  string complete_token = 4; // 验证 Token
+}
+
+// 完成上传响应
+message CompleteUploadResponse {
+  string url = 1;           // 文件访问 URL
+}
