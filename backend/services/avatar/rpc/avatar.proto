@@ -1,0 +1,131 @@
+syntax = "proto3";
+
+package avatar;
+option go_package = "./avatar";
+
+// Avatar 服务
+service Avatar {
+  // 创建分身
+  rpc CreateAvatar(CreateAvatarRequest) returns (CreateAvatarResponse);
+
+  // 获取当前用户的分身
+  rpc GetMyAvatar(GetMyAvatarRequest) returns (GetMyAvatarResponse);
+
+  // 获取分身详情
+  rpc GetAvatarInfo(GetAvatarInfoRequest) returns (GetAvatarInfoResponse);
+
+  // 更新分身资料
+  rpc UpdateAvatarProfile(UpdateAvatarProfileRequest) returns (UpdateAvatarProfileResponse);
+
+  // 获取头像上传凭证
+  rpc GetAvatarUploadToken(GetAvatarUploadTokenRequest) returns (GetAvatarUploadTokenResponse);
+
+  // 完成头像上传
+  rpc CompleteAvatarUpload(CompleteAvatarUploadRequest) returns (CompleteAvatarUploadResponse);
+}
+
+// 创建分身请求
+message CreateAvatarRequest {
+  int64 user_id = 1;           // 用户ID
+  string nickname = 2;         // 昵称
+  string avatar_url = 3;       // 头像URL
+  int32 gender = 4;            // 性别 1:男 2:女 3:其他
+  string birth_date = 5;       // 出生日期 YYYY-MM-DD
+  string occupation = 6;       // 职业
+  int32 marital_status = 7;    // 婚姻状态 1:单身 2:恋爱中 3:已婚 4:其他
+}
+
+// 创建分身响应
+message CreateAvatarResponse {
+  int64 avatar_id = 1;
+  PersonalityInfo personality = 2;  // 生成的人格信息
+}
+
+// 获取我的分身请求
+message GetMyAvatarRequest {
+  int64 user_id = 1;
+}
+
+// 获取我的分身响应
+message GetMyAvatarResponse {
+  bool has_avatar = 1;         // 是否有分身
+  AvatarInfo avatar = 2;       // 分身信息（如果有）
+}
+
+// 获取分身详情请求
+message GetAvatarInfoRequest {
+  int64 avatar_id = 1;
+}
+
+// 获取分身详情响应
+message GetAvatarInfoResponse {
+  AvatarInfo avatar = 1;
+}
+
+// 更新分身资料请求
+message UpdateAvatarProfileRequest {
+  int64 avatar_id = 1;
+  string nickname = 2;         // 昵称（可选）
+  string avatar_url = 3;       // 头像URL（可选）
+}
+
+// 更新分身资料响应
+message UpdateAvatarProfileResponse {
+  bool success = 1;
+}
+
+// 获取头像上传凭证请求
+message GetAvatarUploadTokenRequest {
+  int64 avatar_id = 1;         // 分身ID
+  string file_name = 2;        // 文件名
+}
+
+// 获取头像上传凭证响应
+message GetAvatarUploadTokenResponse {
+  string host = 1;             // OSS 上传地址
+  string access_key_id = 2;    // AccessKeyId
+  string policy = 3;           // 上传策略（Base64）
+  string signature = 4;        // 签名
+  string key = 5;              // 文件路径
+  int64 expire = 6;            // 过期时间戳
+  string domain = 7;           // 文件访问域名
+  string complete_token = 8;   // 完成上传的验证 Token
+}
+
+// 完成头像上传请求
+message CompleteAvatarUploadRequest {
+  int64 avatar_id = 1;         // 分身ID
+  string key = 2;              // 文件 Key
+  string complete_token = 3;   // 验证 Token
+}
+
+// 完成头像上传响应
+message CompleteAvatarUploadResponse {
+  bool success = 1;
+  string avatar_url = 2;       // 头像访问 URL
+}
+
+// 分身信息
+message AvatarInfo {
+  int64 avatar_id = 1;
+  int64 user_id = 2;
+  string nickname = 3;
+  string avatar_url = 4;
+  int32 gender = 5;
+  string birth_date = 6;
+  string occupation = 7;
+  int32 marital_status = 8;
+  PersonalityInfo personality = 9;
+  int64 created_at = 10;
+  int64 updated_at = 11;
+}
+
+// 人格信息（6维）
+message PersonalityInfo {
+  int32 warmth = 1;            // 情绪温度 0-100 (温暖↔冷静)
+  int32 adventurous = 2;       // 冒险倾向 0-100 (冒险↔安全)
+  int32 social = 3;            // 人际能量 0-100 (社交↔独处)
+  int32 creative = 4;          // 创造性 0-100 (创造↔结构)
+  int32 calm = 5;              // 情绪稳定性 0-100 (沉稳↔敏感)
+  int32 energetic = 6;         // 生活动力 0-100 (活力↔温和)
+}
