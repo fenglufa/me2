@@ -1,0 +1,100 @@
+syntax = "proto3";
+
+package scheduler;
+option go_package = "./scheduler";
+
+// 调度管理服务
+service Scheduler {
+  // 启用分身调度
+  rpc EnableAvatarSchedule(EnableAvatarScheduleRequest) returns (EnableAvatarScheduleResponse);
+
+  // 暂停分身调度
+  rpc PauseAvatarSchedule(PauseAvatarScheduleRequest) returns (PauseAvatarScheduleResponse);
+
+  // 恢复分身调度
+  rpc ResumeAvatarSchedule(ResumeAvatarScheduleRequest) returns (ResumeAvatarScheduleResponse);
+
+  // 获取分身调度状态
+  rpc GetAvatarScheduleStatus(GetAvatarScheduleStatusRequest) returns (GetAvatarScheduleStatusResponse);
+
+  // 手动触发一次调度
+  rpc TriggerSchedule(TriggerScheduleRequest) returns (TriggerScheduleResponse);
+
+  // 批量获取调度状态
+  rpc BatchGetScheduleStatus(BatchGetScheduleStatusRequest) returns (BatchGetScheduleStatusResponse);
+}
+
+// 启用分身调度
+message EnableAvatarScheduleRequest {
+  int64 avatar_id = 1;
+}
+
+message EnableAvatarScheduleResponse {
+  bool success = 1;
+  string message = 2;
+  ScheduleInfo schedule_info = 3;
+}
+
+// 暂停分身调度
+message PauseAvatarScheduleRequest {
+  int64 avatar_id = 1;
+}
+
+message PauseAvatarScheduleResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// 恢复分身调度
+message ResumeAvatarScheduleRequest {
+  int64 avatar_id = 1;
+}
+
+message ResumeAvatarScheduleResponse {
+  bool success = 1;
+  string message = 2;
+  ScheduleInfo schedule_info = 3;
+}
+
+// 获取调度状态
+message GetAvatarScheduleStatusRequest {
+  int64 avatar_id = 1;
+}
+
+message GetAvatarScheduleStatusResponse {
+  ScheduleInfo schedule_info = 1;
+}
+
+// 手动触发调度
+message TriggerScheduleRequest {
+  int64 avatar_id = 1;
+}
+
+message TriggerScheduleResponse {
+  bool success = 1;
+  string message = 2;
+  string action_type = 3;
+  int64 action_log_id = 4;
+}
+
+// 批量获取调度状态
+message BatchGetScheduleStatusRequest {
+  repeated int64 avatar_ids = 1;
+}
+
+message BatchGetScheduleStatusResponse {
+  repeated ScheduleInfo schedule_infos = 1;
+}
+
+// 调度信息
+message ScheduleInfo {
+  int64 avatar_id = 1;
+  string status = 2; // active, paused, disabled
+  string next_schedule_time = 3;
+  string last_schedule_time = 4;
+  string last_action_type = 5;
+  int32 schedule_count = 6;
+  int32 failed_count = 7;
+  string created_at = 8;
+  string updated_at = 9;
+}
