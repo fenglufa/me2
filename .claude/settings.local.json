@@ -23,7 +23,8 @@
       "Bash(go mod edit:*)",
       "Bash(mysql:*)",
       "Bash(make run-dev:*)",
-      "Bash(go build:*)"
+      "Bash(go build:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []
