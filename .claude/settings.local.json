@@ -18,7 +18,11 @@
       "Bash(./scripts/etcd-manager.sh:*)",
       "Bash(grpcurl:*)",
       "Bash(./test-oss.sh)",
-      "Bash(./test-oss.sh:*)"
+      "Bash(./test-oss.sh:*)",
+      "Bash(go mod init:*)",
+      "Bash(go mod edit:*)",
+      "Bash(mysql:*)",
+      "Bash(make run-dev:*)"
     ],
     "deny": [],
     "ask": []

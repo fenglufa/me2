@@ -1,0 +1,156 @@
+syntax = "proto3";
+
+package user;
+option go_package = "./user";
+
+// 用户服务
+service User {
+  // 发送验证码
+  rpc SendVerifyCode(SendVerifyCodeRequest) returns (SendVerifyCodeResponse);
+
+  // 登录或注册（手机号+验证码）
+  rpc LoginOrRegister(LoginOrRegisterRequest) returns (LoginOrRegisterResponse);
+
+  // 获取用户信息
+  rpc GetUserInfo(GetUserInfoRequest) returns (GetUserInfoResponse);
+
+  // 更新订阅状态
+  rpc UpdateSubscription(UpdateSubscriptionRequest) returns (UpdateSubscriptionResponse);
+
+  // 获取订阅信息
+  rpc GetSubscription(GetSubscriptionRequest) returns (GetSubscriptionResponse);
+
+  // 更新用户状态
+  rpc UpdateUserStatus(UpdateUserStatusRequest) returns (UpdateUserStatusResponse);
+
+  // 更新用户信息（昵称、头像）
+  rpc UpdateUserInfo(UpdateUserInfoRequest) returns (UpdateUserInfoResponse);
+
+  // 获取头像上传凭证
+  rpc GetAvatarUploadToken(GetAvatarUploadTokenRequest) returns (GetAvatarUploadTokenResponse);
+
+  // 完成头像上传
+  rpc CompleteAvatarUpload(CompleteAvatarUploadRequest) returns (CompleteAvatarUploadResponse);
+}
+
+// 发送验证码请求
+message SendVerifyCodeRequest {
+  string phone = 1;           // 手机号
+}
+
+// 发送验证码响应
+message SendVerifyCodeResponse {
+  bool success = 1;
+}
+
+// 登录或注册请求
+message LoginOrRegisterRequest {
+  string phone = 1;           // 手机号
+  string code = 2;            // 验证码
+}
+
+// 登录或注册响应
+message LoginOrRegisterResponse {
+  int64 user_id = 1;                    // 用户ID
+  string phone = 2;                     // 手机号
+  string nickname = 3;                  // 昵称
+  string avatar = 4;                    // 头像URL
+  int32 subscription_type = 5;          // 订阅类型 0:免费 1:付费
+  int64 subscription_expire_time = 6;   // 会员过期时间（Unix时间戳）
+  bool is_new_user = 7;                 // 是否新用户
+}
+
+// 获取用户信息请求
+message GetUserInfoRequest {
+  int64 user_id = 1;
+}
+
+// 获取用户信息响应
+message GetUserInfoResponse {
+  int64 user_id = 1;
+  string phone = 2;
+  string nickname = 3;                  // 昵称
+  string avatar = 4;                    // 头像URL
+  int32 subscription_type = 5;
+  int64 subscription_expire_time = 6;
+  int32 status = 7;                     // 状态 1:正常 2:封禁 3:注销
+  int64 created_at = 8;
+  int64 updated_at = 9;
+}
+
+// 更新订阅请求
+message UpdateSubscriptionRequest {
+  int64 user_id = 1;
+  int32 subscription_type = 2;          // 0:免费 1:付费
+  int64 subscription_expire_time = 3;   // 过期时间（Unix时间戳）
+}
+
+// 更新订阅响应
+message UpdateSubscriptionResponse {
+  bool success = 1;
+}
+
+// 获取订阅请求
+message GetSubscriptionRequest {
+  int64 user_id = 1;
+}
+
+// 获取订阅响应
+message GetSubscriptionResponse {
+  int32 subscription_type = 1;
+  int64 subscription_expire_time = 2;
+}
+
+// 更新用户状态请求
+message UpdateUserStatusRequest {
+  int64 user_id = 1;
+  int32 status = 2;                     // 1:正常 2:封禁 3:注销
+}
+
+// 更新用户状态响应
+message UpdateUserStatusResponse {
+  bool success = 1;
+}
+
+// 更新用户信息请求
+message UpdateUserInfoRequest {
+  int64 user_id = 1;
+  string nickname = 2;  // 昵称（可选）
+  string avatar = 3;    // 头像URL（可选）
+}
+
+// 更新用户信息响应
+message UpdateUserInfoResponse {
+  bool success = 1;
+}
+
+// 获取头像上传凭证请求
+message GetAvatarUploadTokenRequest {
+  int64 user_id = 1;      // 用户ID
+  string file_name = 2;   // 文件名
+}
+
+// 获取头像上传凭证响应
+message GetAvatarUploadTokenResponse {
+  string host = 1;            // 上传地址
+  string access_key_id = 2;   // AccessKeyId
+  string policy = 3;          // 策略
+  string signature = 4;       // 签名
+  string key = 5;            // 文件key
+  int64 expire = 6;          // 过期时间
+  string domain = 7;         // 访问域名
+  string complete_token = 8;  // 完成上传的token
+}
+
+// 完成头像上传请求
+message CompleteAvatarUploadRequest {
+  int64 user_id = 1;        // 用户ID
+  string key = 2;           // 文件key
+  string complete_token = 3; // 完成上传的token
+}
+
+// 完成头像上传响应
+message CompleteAvatarUploadResponse {
+  bool success = 1;
+  string avatar_url = 2;    // 头像URL
+}
