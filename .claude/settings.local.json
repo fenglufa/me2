@@ -1,7 +1,24 @@
 {
   "permissions": {
     "allow": [
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(make gen-rpc:*)",
+      "Bash(make init:*)",
+      "Bash(go get:*)",
+      "Bash(go mod tidy:*)",
+      "Bash(make build:*)",
+      "Bash(goctl rpc:*)",
+      "Bash(timeout 3 make:*)",
+      "Bash(go run:*)",
+      "Bash(redis-cli ping:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill:*)",
+      "Bash(etcdctl get:*)",
+      "Bash(chmod:*)",
+      "Bash(./scripts/etcd-manager.sh:*)",
+      "Bash(grpcurl:*)",
+      "Bash(./test-oss.sh)",
+      "Bash(./test-oss.sh:*)"
     ],
     "deny": [],
     "ask": []
