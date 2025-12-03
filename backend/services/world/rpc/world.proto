@@ -1,0 +1,162 @@
+syntax = "proto3";
+
+package world;
+option go_package = "./world";
+
+// World Service - 世界地图服务
+service World {
+  // 获取世界地图
+  rpc GetMap(GetMapRequest) returns (GetMapResponse);
+
+  // 获取区域详情
+  rpc GetRegion(GetRegionRequest) returns (GetRegionResponse);
+
+  // 获取场景详情
+  rpc GetScene(GetSceneRequest) returns (GetSceneResponse);
+
+  // 列出区域内的场景
+  rpc ListScenesInRegion(ListScenesInRegionRequest) returns (ListScenesInRegionResponse);
+
+  // 根据行为类型推荐场景
+  rpc GetScenesForAction(GetScenesForActionRequest) returns (GetScenesForActionResponse);
+
+  // 获取所有地图列表
+  rpc ListMaps(ListMapsRequest) returns (ListMapsResponse);
+
+  // 获取地图的所有区域
+  rpc ListRegionsInMap(ListRegionsInMapRequest) returns (ListRegionsInMapResponse);
+}
+
+// ========== 世界地图 ==========
+
+message WorldMap {
+  int64 id = 1;
+  string name = 2;              // 地图名称，如"初始世界"
+  string description = 3;       // 地图描述
+  string cover_image = 4;       // 封面图片URL
+  bool is_active = 5;           // 是否激活
+  int64 created_at = 6;
+  int64 updated_at = 7;
+}
+
+message GetMapRequest {
+  int64 map_id = 1;
+}
+
+message GetMapResponse {
+  WorldMap map = 1;
+}
+
+message ListMapsRequest {
+  int32 page = 1;               // 页码，从1开始
+  int32 page_size = 2;          // 每页数量，默认20
+  bool only_active = 3;         // 只返回激活的地图
+}
+
+message ListMapsResponse {
+  repeated WorldMap maps = 1;
+  int64 total = 2;              // 总数
+}
+
+// ========== 区域 ==========
+
+message WorldRegion {
+  int64 id = 1;
+  int64 map_id = 2;             // 所属地图ID
+  string name = 3;              // 区域名称，如"繁华都市"、"宁静森林"
+  string description = 4;       // 区域描述
+  string cover_image = 5;       // 封面图片URL
+  string atmosphere = 6;        // 氛围标签，如"热闹"、"安静"、"自然"
+  repeated string tags = 7;     // 区域标签，如"城市"、"自然"、"学习"
+  bool is_active = 8;           // 是否激活
+  int64 created_at = 9;
+  int64 updated_at = 10;
+}
+
+message GetRegionRequest {
+  int64 region_id = 1;
+}
+
+message GetRegionResponse {
+  WorldRegion region = 1;
+}
+
+message ListRegionsInMapRequest {
+  int64 map_id = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+  bool only_active = 4;         // 只返回激活的区域
+}
+
+message ListRegionsInMapResponse {
+  repeated WorldRegion regions = 1;
+  int64 total = 2;
+}
+
+// ========== 场景 ==========
+
+message WorldScene {
+  int64 id = 1;
+  int64 region_id = 2;          // 所属区域ID
+  string name = 3;              // 场景名称，如"星巴克咖啡厅"、"市立图书馆"
+  string description = 4;       // 场景描述
+  string cover_image = 5;       // 封面图片URL
+  string atmosphere = 6;        // 氛围，如"安静"、"热闹"、"舒适"
+  repeated string tags = 7;     // 场景标签，如"咖啡"、"学习"、"社交"
+  repeated string suitable_actions = 8;  // 适合的行为类型，如["study", "social", "rest"]
+  int32 capacity = 9;           // 容量（同时在场的最大分身数）
+  bool is_active = 10;          // 是否激活
+  SceneFeatures features = 11;  // 场景特征
+  int64 created_at = 12;
+  int64 updated_at = 13;
+}
+
+message SceneFeatures {
+  bool has_wifi = 1;            // 是否有WiFi
+  bool has_food = 2;            // 是否有食物
+  bool has_seating = 3;         // 是否有座位
+  bool is_indoor = 4;           // 是否室内
+  bool is_quiet = 5;            // 是否安静
+  int32 comfort_level = 6;      // 舒适度 1-10
+  int32 social_level = 7;       // 社交度 1-10
+}
+
+message GetSceneRequest {
+  int64 scene_id = 1;
+}
+
+message GetSceneResponse {
+  WorldScene scene = 1;
+}
+
+message ListScenesInRegionRequest {
+  int64 region_id = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+  bool only_active = 4;         // 只返回激活的场景
+  repeated string tags = 5;     // 按标签筛选
+}
+
+message ListScenesInRegionResponse {
+  repeated WorldScene scenes = 1;
+  int64 total = 2;
+}
+
+// ========== 行为推荐 ==========
+
+message GetScenesForActionRequest {
+  string action_type = 1;       // 行为类型: exploration, social, study, creative, rest, play
+  int64 map_id = 2;             // 指定地图ID（可选）
+  int64 region_id = 3;          // 指定区域ID（可选）
+  int32 limit = 4;              // 返回数量限制，默认10
+}
+
+message GetScenesForActionResponse {
+  repeated SceneRecommendation recommendations = 1;
+}
+
+message SceneRecommendation {
+  WorldScene scene = 1;
+  float match_score = 2;        // 匹配度分数 0-100
+  string reason = 3;            // 推荐理由
+}
