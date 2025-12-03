@@ -1,13 +1,14 @@
 module github.com/me2/avatar
 
-go 1.24.0
-
-toolchain go1.24.11
+go 1.24.11
 
 replace github.com/me2/oss => ../oss
 
+replace github.com/me2/scheduler => ../scheduler
+
 require (
 	github.com/me2/oss v0.0.0-00010101000000-000000000000
+	github.com/me2/scheduler v0.0.0-00010101000000-000000000000
 	github.com/zeromicro/go-zero v1.9.3
 	google.golang.org/grpc v1.77.0
 	google.golang.org/protobuf v1.36.10

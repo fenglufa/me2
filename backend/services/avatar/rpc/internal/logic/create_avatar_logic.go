@@ -9,6 +9,7 @@ import (
 	"github.com/me2/avatar/rpc/internal/model"
 	"github.com/me2/avatar/rpc/internal/personality"
 	"github.com/me2/avatar/rpc/internal/svc"
+	"github.com/me2/scheduler/rpc/scheduler"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -71,6 +72,19 @@ func (l *CreateAvatarLogic) CreateAvatar(in *avatar.CreateAvatarRequest) (*avata
 		l.Errorf("创建分身失败: %v", err)
 		return nil, fmt.Errorf("创建分身失败")
 	}
+
+	// 自动启用调度（异步调用，失败不影响分身创建）
+	go func() {
+		scheduleCtx := context.Background()
+		_, scheduleErr := l.svcCtx.SchedulerRpc.EnableAvatarSchedule(scheduleCtx, &scheduler.EnableAvatarScheduleRequest{
+			AvatarId: avatarId,
+		})
+		if scheduleErr != nil {
+			l.Errorf("自动启用分身调度失败 (avatar_id=%d): %v", avatarId, scheduleErr)
+		} else {
+			l.Infof("已为分身 %d 自动启用调度", avatarId)
+		}
+	}()
 
 	return &avatar.CreateAvatarResponse{
 		AvatarId: avatarId,

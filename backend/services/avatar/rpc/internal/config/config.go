@@ -7,6 +7,7 @@ type Config struct {
 	Mysql struct {
 		DataSource string
 	}
-	OssRpc    zrpc.RpcClientConf
-	MachineID int64
+	OssRpc       zrpc.RpcClientConf
+	SchedulerRpc zrpc.RpcClientConf
+	MachineID    int64
 }
