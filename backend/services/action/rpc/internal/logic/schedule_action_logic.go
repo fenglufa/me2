@@ -8,6 +8,7 @@ import (
 	"github.com/me2/action/rpc/internal/model"
 	"github.com/me2/action/rpc/internal/svc"
 	"github.com/me2/avatar/rpc/avatar_client"
+	"github.com/me2/event/rpc/event_client"
 	"github.com/me2/world/rpc/world_client"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -78,6 +79,26 @@ func (l *ScheduleActionLogic) ScheduleAction(in *action.ScheduleActionRequest) (
 
 	id, _ := result.LastInsertId()
 	actionLog.Id = id
+
+	// 7. 调用 Event Service 生成事件
+	eventResp, err := l.svcCtx.EventRpc.GenerateEvent(l.ctx, &event_client.GenerateEventRequest{
+		AvatarId:   in.AvatarId,
+		ActionType: bestIntent.ActionType,
+		SceneId:    selectedScene.Scene.Id,
+	})
+	if err != nil {
+		// 事件生成失败不影响行动调度，记录日志即可
+		l.Errorf("生成事件失败 (action_id=%d, avatar_id=%d): %v", id, in.AvatarId, err)
+	} else {
+		// 更新行动日志的事件ID
+		err = l.svcCtx.ActionLogModel.UpdateEventId(id, eventResp.EventId)
+		if err != nil {
+			l.Errorf("更新事件ID失败 (action_id=%d, event_id=%d): %v", id, eventResp.EventId, err)
+		} else {
+			actionLog.EventId = eventResp.EventId
+			l.Infof("成功生成事件 (action_id=%d, event_id=%d, type=%s)", id, eventResp.EventId, eventResp.EventType)
+		}
+	}
 
 	return &action.ScheduleActionResponse{
 		Action: ModelToProtoActionLog(actionLog),

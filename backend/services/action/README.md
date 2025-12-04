@@ -80,6 +80,7 @@ action/
 ### 依赖服务
 - Avatar Service: 获取分身信息和人格特征
 - World Service: 获取场景推荐
+- Event Service: 生成事件内容
 - MySQL: 存储行动日志
 - Etcd: 服务发现
 
@@ -129,6 +130,13 @@ WorldRpc:
     Hosts:
       - 127.0.0.1:2379
     Key: world.rpc
+
+EventRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: event.rpc
+  Timeout: 35000  # 35秒超时，Event生成需要调用AI服务
 
 ActionSchedule:
   MinIntervalHours: 2
@@ -197,10 +205,10 @@ rpc GetLastAction(GetLastActionRequest) returns (GetLastActionResponse);
 
 ## 注意事项
 
-1. 服务启动前需要确保 MySQL、Etcd、Avatar Service 和 World Service 已启动
+1. 服务启动前需要确保 MySQL、Etcd、Avatar Service、World Service 和 Event Service 已启动
 2. 需要先执行 action.sql 创建数据库表
 3. ~~行动调度建议通过定时任务（如 cron）定期调用~~（已废弃，见下方"调度机制说明"）
-4. event_id 字段暂时为 0，后续由 Event Service 更新
+4. Event Service 集成后，行动调度会自动触发事件生成
 
 ## 调度机制说明
 
@@ -230,9 +238,15 @@ rpc GetLastAction(GetLastActionRequest) returns (GetLastActionResponse);
 Scheduler Service (每 60 秒扫描)
     ↓ 到达调度时间
 Action Service.ScheduleAction
+    ↓ 获取分身信息
+Avatar Service.GetAvatarInfo
     ↓ 计算意图并选择行为
-World Service (推荐场景)
+    ↓ 推荐场景
+World Service.GetScenesForAction
     ↓ 记录行动日志
+    ↓ 生成事件（已集成）
+Event Service.GenerateEvent
+    ↓ 更新行动日志中的 event_id
 返回结果
 
 【首次行动】
@@ -251,11 +265,19 @@ Avatar Service.CreateAvatar
 3. 选择最佳行为类型
 4. 调用 World Service 推荐合适场景
 5. 记录行动日志
+6. **调用 Event Service 生成事件（已集成）**
+7. **更新行动日志的 event_id**
 
 **谁会调用这个接口？**
 - **Scheduler Service**：定期自动调度（2-6 小时间隔）
 - **Avatar Service**：分身创建时立即触发首次行动
 - **手动触发**：通过 Scheduler Service 的 `TriggerSchedule` 接口
+
+**Event Service 集成说明**：
+- 在成功记录行动日志后，会自动调用 Event Service 生成个性化事件内容
+- 事件生成成功后，会更新 action_logs 表中的 event_id 字段
+- 如果事件生成失败，不会影响行动调度的成功执行，event_id 保持为 0
+- Event Service 配置了 35 秒超时，因为 AI 内容生成需要较长时间
 
 ## 后续优化
 

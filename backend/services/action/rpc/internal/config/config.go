@@ -7,6 +7,7 @@ type Config struct {
 	Mysql          MysqlConfig
 	AvatarRpc      zrpc.RpcClientConf
 	WorldRpc       zrpc.RpcClientConf
+	EventRpc       zrpc.RpcClientConf
 	ActionSchedule ActionScheduleConfig
 }
 

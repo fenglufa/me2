@@ -78,3 +78,10 @@ func (m *ActionLogModel) FindLastByAvatarId(avatarId int64) (*ActionLog, error) 
 	}
 	return &log, nil
 }
+
+// UpdateEventId 更新行动日志的事件ID
+func (m *ActionLogModel) UpdateEventId(id, eventId int64) error {
+	query := `UPDATE action_logs SET event_id = ? WHERE id = ?`
+	_, err := m.conn.Exec(query, eventId, id)
+	return err
+}
