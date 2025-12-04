@@ -324,9 +324,69 @@ grpcurl -plaintext -proto avatar.proto \
 3. **验证**：完成上传时通过 `complete_token` 验证
 4. **原子性**：只有在 OSS 验证成功后，才会更新数据库
 
+## 分身生命周期
+
+### 创建分身时的自动化流程
+
+当用户创建分身后，Avatar 服务会自动触发以下操作（均为异步调用，失败不影响分身创建）：
+
+#### 1. 启用自动调度
+调用 **Scheduler Service** 的 `EnableAvatarSchedule` 接口，为分身启用自动调度：
+- 调度间隔：2-6 小时随机
+- 调度器每 60 秒自动扫描数据库，到时间后自动触发分身行动
+- 分身将持续自主"生活"，无需外部触发
+
+#### 2. 触发首次行动
+调用 **Action Service** 的 `ScheduleAction` 接口，立即为新创建的分身触发第一次行动：
+- 目的：让用户第一时间感受到分身在新世界中的活动
+- 行为示例："刚进入新的世界，开始熟悉环境" 或 "开始探索周围的场景"
+- 后续行动将由 Scheduler Service 自动调度
+
+#### 3. 代码实现
+
+```go
+// 自动启用调度（异步调用，失败不影响分身创建）
+go func() {
+    scheduleCtx := context.Background()
+    _, scheduleErr := l.svcCtx.SchedulerRpc.EnableAvatarSchedule(scheduleCtx, &scheduler.EnableAvatarScheduleRequest{
+        AvatarId: avatarId,
+    })
+    if scheduleErr != nil {
+        l.Errorf("自动启用分身调度失败 (avatar_id=%d): %v", avatarId, scheduleErr)
+    } else {
+        l.Infof("已为分身 %d 自动启用调度", avatarId)
+    }
+}()
+
+// 立即触发首次行动（异步调用，失败不影响分身创建）
+go func() {
+    actionCtx := context.Background()
+    _, actionErr := l.svcCtx.ActionRpc.ScheduleAction(actionCtx, &action_client.ScheduleActionRequest{
+        AvatarId: avatarId,
+    })
+    if actionErr != nil {
+        l.Errorf("触发分身首次行动失败 (avatar_id=%d): %v", avatarId, actionErr)
+    } else {
+        l.Infof("已为分身 %d 触发首次行动", avatarId)
+    }
+}()
+```
+
+### 为什么使用双异步调用？
+
+1. **不阻塞用户体验**：分身创建成功后立即返回，不等待调度和行动完成
+2. **容错性**：即使调度或行动服务暂时不可用，也不影响分身创建
+3. **职责分离**：
+   - **Scheduler Service** 负责"何时调度"（2-6 小时自动触发）
+   - **Action Service** 负责"做什么"（决策行为逻辑）
+   - **Avatar Service** 只负责分身数据管理
+4. **首次体验优化**：用户不必等待 2-6 小时才看到分身的第一个动作
+
 ## 依赖服务
 
 - **OSS Service**: 头像上传凭证和完成上传
+- **Scheduler Service**: 自动调度分身行为（创建分身时自动启用）
+- **Action Service**: 行为决策和执行（创建分身时立即触发首次行动）
 - **MySQL**: 分身数据存储
 - **Etcd**: 服务注册与发现
 

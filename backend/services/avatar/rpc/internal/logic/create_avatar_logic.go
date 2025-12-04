@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/me2/action/rpc/action_client"
 	"github.com/me2/avatar/rpc/avatar"
 	"github.com/me2/avatar/rpc/internal/model"
 	"github.com/me2/avatar/rpc/internal/personality"
@@ -83,6 +84,19 @@ func (l *CreateAvatarLogic) CreateAvatar(in *avatar.CreateAvatarRequest) (*avata
 			l.Errorf("自动启用分身调度失败 (avatar_id=%d): %v", avatarId, scheduleErr)
 		} else {
 			l.Infof("已为分身 %d 自动启用调度", avatarId)
+		}
+	}()
+
+	// 立即触发首次行动（异步调用，失败不影响分身创建）
+	go func() {
+		actionCtx := context.Background()
+		_, actionErr := l.svcCtx.ActionRpc.ScheduleAction(actionCtx, &action_client.ScheduleActionRequest{
+			AvatarId: avatarId,
+		})
+		if actionErr != nil {
+			l.Errorf("触发分身首次行动失败 (avatar_id=%d): %v", avatarId, actionErr)
+		} else {
+			l.Infof("已为分身 %d 触发首次行动", avatarId)
 		}
 	}()
 

@@ -9,5 +9,6 @@ type Config struct {
 	}
 	OssRpc       zrpc.RpcClientConf
 	SchedulerRpc zrpc.RpcClientConf
+	ActionRpc    zrpc.RpcClientConf
 	MachineID    int64
 }

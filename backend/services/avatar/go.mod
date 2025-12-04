@@ -6,7 +6,10 @@ replace github.com/me2/oss => ../oss
 
 replace github.com/me2/scheduler => ../scheduler
 
+replace github.com/me2/action => ../action
+
 require (
+	github.com/me2/action v0.0.0-00010101000000-000000000000
 	github.com/me2/oss v0.0.0-00010101000000-000000000000
 	github.com/me2/scheduler v0.0.0-00010101000000-000000000000
 	github.com/zeromicro/go-zero v1.9.3

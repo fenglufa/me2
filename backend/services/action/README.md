@@ -199,8 +199,63 @@ rpc GetLastAction(GetLastActionRequest) returns (GetLastActionResponse);
 
 1. 服务启动前需要确保 MySQL、Etcd、Avatar Service 和 World Service 已启动
 2. 需要先执行 action.sql 创建数据库表
-3. 行动调度建议通过定时任务（如 cron）定期调用
+3. ~~行动调度建议通过定时任务（如 cron）定期调用~~（已废弃，见下方"调度机制说明"）
 4. event_id 字段暂时为 0，后续由 Event Service 更新
+
+## 调度机制说明
+
+### 自动调度（常规行为）
+
+**Scheduler Service** 已接管分身的日常行动调度，无需手动设置 cron 任务：
+
+1. **定时扫描**：Scheduler Service 每 60 秒扫描一次数据库
+2. **自动触发**：到达调度时间时，Scheduler Service 自动调用 Action Service 的 `ScheduleAction` 接口
+3. **随机间隔**：调度间隔为 2-6 小时随机，模拟真实生活的不确定性
+4. **并发控制**：最多 10 个并发调度，避免系统过载
+5. **失败重试**：调度失败后 5 分钟重试，连续失败 5 次自动暂停
+
+### 立即触发（首次行为）
+
+**Avatar Service** 在创建分身时会立即调用 Action Service：
+
+1. **触发时机**：分身创建成功后立即触发
+2. **用户体验**：让用户第一时间看到分身的首次行动（如"刚进入新世界，开始熟悉环境"）
+3. **异步调用**：不阻塞分身创建流程，失败不影响分身创建
+4. **后续行为**：之后的行为由 Scheduler Service 自动调度
+
+### 调用链路
+
+```
+【常规调度】
+Scheduler Service (每 60 秒扫描)
+    ↓ 到达调度时间
+Action Service.ScheduleAction
+    ↓ 计算意图并选择行为
+World Service (推荐场景)
+    ↓ 记录行动日志
+返回结果
+
+【首次行动】
+Avatar Service.CreateAvatar
+    ↓ 分身创建成功
+启动两个 goroutine:
+  1. Scheduler Service.EnableAvatarSchedule (启用定时调度)
+  2. Action Service.ScheduleAction (立即触发首次行动)
+```
+
+### ScheduleAction 接口职责
+
+`ScheduleAction` 接口负责：
+1. 获取分身的人格特征
+2. 计算各种行为类型的意图得分
+3. 选择最佳行为类型
+4. 调用 World Service 推荐合适场景
+5. 记录行动日志
+
+**谁会调用这个接口？**
+- **Scheduler Service**：定期自动调度（2-6 小时间隔）
+- **Avatar Service**：分身创建时立即触发首次行动
+- **手动触发**：通过 Scheduler Service 的 `TriggerSchedule` 接口
 
 ## 后续优化
 
