@@ -1,0 +1,110 @@
+syntax = "proto3";
+
+package diary;
+option go_package = "./diary";
+
+// 日记服务
+service Diary {
+  // 生成分身日记（由 Scheduler 调用）
+  rpc GenerateAvatarDiary(GenerateAvatarDiaryRequest) returns (GenerateAvatarDiaryResponse);
+
+  // 获取分身日记列表
+  rpc GetAvatarDiaryList(GetAvatarDiaryListRequest) returns (GetAvatarDiaryListResponse);
+
+  // 创建用户日记
+  rpc CreateUserDiary(CreateUserDiaryRequest) returns (CreateUserDiaryResponse);
+
+  // 获取用户日记列表
+  rpc GetUserDiaryList(GetUserDiaryListRequest) returns (GetUserDiaryListResponse);
+
+  // 获取日记统计
+  rpc GetDiaryStats(GetDiaryStatsRequest) returns (GetDiaryStatsResponse);
+}
+
+// 日记信息
+message DiaryInfo {
+  int64 id = 1;
+  int64 avatar_id = 2;
+  string type = 3;              // avatar/user
+  string date = 4;              // YYYY-MM-DD
+  string title = 5;
+  string content = 6;
+  string mood = 7;              // happy, sad, excited, calm, etc.
+  repeated string tags = 8;
+  string reply_content = 9;     // 分身回应（仅 user 类型）
+  int32 emotion_score = 10;     // -100 到 100（仅 user 类型）
+  bool is_important = 11;
+  string created_at = 12;
+}
+
+// 生成分身日记
+message GenerateAvatarDiaryRequest {
+  int64 avatar_id = 1;
+  string date = 2;              // YYYY-MM-DD，可选，默认今天
+}
+
+message GenerateAvatarDiaryResponse {
+  int64 diary_id = 1;
+  string title = 2;
+  string content = 3;
+  string mood = 4;
+  repeated string tags = 5;
+}
+
+// 获取分身日记列表
+message GetAvatarDiaryListRequest {
+  int64 avatar_id = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+  string start_date = 4;        // 可选
+  string end_date = 5;          // 可选
+}
+
+message GetAvatarDiaryListResponse {
+  repeated DiaryInfo diaries = 1;
+  int64 total = 2;
+}
+
+// 创建用户日记
+message CreateUserDiaryRequest {
+  int64 avatar_id = 1;
+  string title = 2;
+  string content = 3;
+  repeated string tags = 4;
+  bool is_important = 5;
+}
+
+message CreateUserDiaryResponse {
+  int64 diary_id = 1;
+  string reply_content = 2;     // 分身回应
+  int32 emotion_score = 3;      // 情绪分数
+}
+
+// 获取用户日记列表
+message GetUserDiaryListRequest {
+  int64 avatar_id = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+  string start_date = 4;        // 可选
+  string end_date = 5;          // 可选
+}
+
+message GetUserDiaryListResponse {
+  repeated DiaryInfo diaries = 1;
+  int64 total = 2;
+}
+
+// 获取日记统计
+message GetDiaryStatsRequest {
+  int64 avatar_id = 1;
+}
+
+message GetDiaryStatsResponse {
+  int64 total_diaries = 1;          // 总日记数
+  int64 avatar_diaries = 2;         // 分身日记数
+  int64 user_diaries = 3;           // 用户日记数
+  int32 consecutive_days = 4;       // 连续记录天数
+  int64 total_words = 5;            // 总字数
+  string first_diary_date = 6;      // 第一篇日记日期
+  string last_diary_date = 7;       // 最后一篇日记日期
+}

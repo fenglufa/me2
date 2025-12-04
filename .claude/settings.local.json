@@ -24,7 +24,8 @@
       "Bash(mysql:*)",
       "Bash(make run-dev:*)",
       "Bash(go build:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []
