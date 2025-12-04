@@ -11,7 +11,13 @@ Scheduler Service 是 Me2 项目的定时调度服务，负责自动调度 AI �
    - 为每个分身在 2-6 小时的随机间隔内安排下一次行为
    - 调用 Action Service 的 ScheduleAction 接口执行具体行为
 
-2. **调度状态管理**
+2. **日记自动生成**
+   - 基于 Cron 表达式的定时任务（默认每天 22:00）
+   - 自动为所有启用的分身生成日记
+   - 调用 Diary Service 的 GenerateAvatarDiary 接口
+   - 支持通过配置文件自定义生成时间
+
+3. **调度状态管理**
    - `active`: 正常调度状态
    - `paused`: 暂停调度（用户主动暂停）
    - `disabled`: 禁用调度（永久关闭）
@@ -49,10 +55,24 @@ Scheduler Service 是 Me2 项目的定时调度服务，负责自动调度 AI �
 │  │  Database    │         │  Action Service     │ │
 │  │  扫描待调度   │         │  (RPC 调用)          │ │
 │  └──────────────┘         └─────────────────────┘ │
+│                                                     │
+│  ┌──────────────┐         ┌─────────────────────┐ │
+│  │DiaryScheduler│────────▶│  Diary Service      │ │
+│  │ (Cron定时器) │         │  (RPC 调用)          │ │
+│  └──────────────┘         └─────────────────────┘ │
+│         │                           │              │
+│         │ 每天 22:00                │              │
+│         ▼                           ▼              │
+│  ┌──────────────┐         ┌─────────────────────┐ │
+│  │  Database    │         │  生成分身日记         │ │
+│  │  查询启用分身  │         │  (批量生成)          │ │
+│  └──────────────┘         └─────────────────────┘ │
 └─────────────────────────────────────────────────────┘
 ```
 
 ### 调度流程
+
+#### 行为调度流程
 
 1. **定时扫描**: SchedulerCore 每 60 秒执行一次 scan()
 2. **查询待调度**: 从数据库查询 `next_schedule_time <= now AND status = 'active'` 的分身
@@ -60,6 +80,16 @@ Scheduler Service 是 Me2 项目的定时调度服务，负责自动调度 AI �
 4. **调用 Action**: TaskExecutor 调用 Action Service 的 ScheduleAction 接口
 5. **更新状态**: 根据调用结果更新调度配置（成功/失败）
 6. **计算下次调度**: 成功后随机生成 2-6 小时后的下次调度时间
+
+#### 日记生成流程
+
+1. **Cron 定时触发**: DiaryScheduler 根据配置的 Cron 表达式定时触发（默认每天 22:00）
+2. **查询启用分身**: 从数据库查询所有 `status = 'active'` 的分身
+3. **批量生成日记**: 遍历所有分身，依次调用 Diary Service 的 GenerateAvatarDiary 接口
+4. **超时控制**: 每个分身的日记生成请求设置 60 秒超时
+5. **结果统计**: 记录成功和失败的分身数量，输出统计日志
+6. **独立运行**: 日记生成与行为调度独立运行，互不影响
+
 
 ## 数据库表结构
 
@@ -128,6 +158,10 @@ Schedule:
 ActionSchedule:
   MinIntervalHours: 2  # 最小调度间隔（小时）
   MaxIntervalHours: 6  # 最大调度间隔（小时）
+
+# 日记调度配置
+DiarySchedule:
+  CronExpression: "0 22 * * *"  # 每天 22:00 生成日记
 ```
 
 **配置参数说明**：
@@ -148,6 +182,12 @@ ActionSchedule:
    - 默认 6 小时
    - 分身最多间隔 6 小时执行一次行为
    - 实际间隔在 2-6 小时之间随机
+
+5. **DiarySchedule.CronExpression**: 日记生成时间
+   - 使用标准 Cron 表达式格式
+   - 默认 "0 22 * * *"（每天 22:00）
+   - 可自定义为任意时间，如 "0 20 * * *"（每天 20:00）
+   - 如果配置为空，使用默认值
 
 ## 使用方法
 
@@ -407,6 +447,39 @@ Scheduler Service                Action Service
 4. Scheduler 根据返回结果更新调度配置
 5. 计算下次调度时间（2-6 小时随机）
 
+### 与 Diary Service 的交互
+
+Scheduler Service 依赖 Diary Service 生成分身日记：
+
+```
+Scheduler Service                Diary Service
+      │                                │
+      │  每天 22:00 定时触发             │
+      │                                │
+      │  查询所有启用的分身               │
+      │                                │
+      │  GenerateAvatarDiary(avatar_id, date)  │
+      ├───────────────────────────────▶│
+      │                                │
+      │  分析行为和互动历史               │
+      │  调用 AI 生成个性化日记           │
+      │                                │
+      │  返回生成结果                    │
+      │◀───────────────────────────────┤
+      │                                │
+      │  记录成功/失败统计                │
+      │  继续下一个分身                  │
+      │                                │
+```
+
+**调用流程**：
+1. DiaryScheduler 根据 Cron 表达式定时触发（默认每天 22:00）
+2. 查询数据库获取所有 `status = 'active'` 的分身列表
+3. 遍历分身列表，依次调用 Diary Service 的 `GenerateAvatarDiary` 接口
+4. 每个请求设置 60 秒超时，避免长时间阻塞
+5. 记录每个分身的生成结果（成功/失败）
+6. 输出最终统计日志：成功数量和失败数量
+
 ## 初始化分身调度
 
 当创建新分身时，需要为其初始化调度配置：
@@ -427,12 +500,26 @@ resp, err := schedulerRpc.EnableAvatarSchedule(ctx, &scheduler.EnableAvatarSched
 
 ### 关键日志
 
+#### 行为调度日志
 ```
 [TaskExecutor] 开始调度分身: {avatar_id}
 [TaskExecutor] 分身 {avatar_id} 调度成功，行为类型: {action_type}，下次调度: {next_time}
 [TaskExecutor] 分身 {avatar_id} 调度失败: {error}
 [TaskExecutor] 分身 {avatar_id} 连续失败 {count} 次，暂停调度
 ```
+
+#### 日记生成日志
+```
+[DiaryScheduler] 日记调度器启动，Cron 表达式: {cron_expr}
+[DiaryScheduler] 查询启用的分身失败: {error}
+[DiaryScheduler] 没有启用的分身，跳过日记生成
+[DiaryScheduler] 开始为 {count} 个分身生成日记
+[DiaryScheduler] 分身 {avatar_id} 日记生成成功
+[DiaryScheduler] 分身 {avatar_id} 日记生成失败: {error}
+[DiaryScheduler] 日记生成完成，成功: {success_count}，失败: {fail_count}
+[DiaryScheduler] 日记调度器已停止
+```
+
 
 ### 监控指标建议
 
@@ -459,7 +546,8 @@ scheduler/
 │       ├── model/
 │       │   └── avatar_schedule_model.go  # 数据模型层
 │       ├── scheduler/
-│       │   ├── scheduler_core.go    # 核心调度器
+│       │   ├── scheduler_core.go    # 核心调度器（行为调度）
+│       │   ├── diary_scheduler.go   # 日记调度器（Cron 定时任务）
 │       │   └── task_executor.go     # 任务执行器
 │       ├── logic/
 │       │   ├── enable_avatar_schedule_logic.go
@@ -538,10 +626,12 @@ scheduler/
 - **RPC**: gRPC + Protobuf
 - **数据库**: MySQL 8.0+
 - **服务发现**: Etcd 3.5+
+- **定时任务**: robfig/cron v3.0.1
 - **Go 版本**: 1.24.11
 
 ## 相关服务
 
 - **Action Service**: 行为执行服务（端口 8007）
+- **Diary Service**: 日记生成服务（端口 8009）
 - **Avatar Service**: 分身管理服务（端口 8003）
 - **User Service**: 用户管理服务（端口 8001）

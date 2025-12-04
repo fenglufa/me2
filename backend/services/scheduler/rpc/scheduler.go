@@ -31,6 +31,11 @@ func main() {
 	schedulerCore.Start()
 	defer schedulerCore.Stop()
 
+	// 启动日记调度器
+	diaryScheduler := schedcore.NewDiaryScheduler(ctx)
+	diaryScheduler.Start()
+	defer diaryScheduler.Stop()
+
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
 		scheduler.RegisterSchedulerServer(grpcServer, server.NewSchedulerServer(ctx))
 

@@ -124,3 +124,19 @@ func (m *AvatarScheduleModel) Delete(ctx context.Context, avatarId int64) error 
 	_, err := m.conn.ExecCtx(ctx, query, avatarId)
 	return err
 }
+
+// FindActiveSchedules 查找所有启用的分身
+func (m *AvatarScheduleModel) FindActiveSchedules(ctx context.Context) ([]*AvatarSchedule, error) {
+	query := `SELECT id, avatar_id, status, next_schedule_time, last_schedule_time,
+		last_action_type, schedule_count, failed_count, created_at, updated_at
+		FROM avatar_schedules
+		WHERE status = 'active'
+		ORDER BY avatar_id ASC`
+
+	var schedules []*AvatarSchedule
+	err := m.conn.QueryRowsCtx(ctx, &schedules, query)
+	if err != nil {
+		return nil, err
+	}
+	return schedules, nil
+}
