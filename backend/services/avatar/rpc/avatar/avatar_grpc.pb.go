@@ -25,6 +25,7 @@ const (
 	Avatar_UpdateAvatarProfile_FullMethodName  = "/avatar.Avatar/UpdateAvatarProfile"
 	Avatar_GetAvatarUploadToken_FullMethodName = "/avatar.Avatar/GetAvatarUploadToken"
 	Avatar_CompleteAvatarUpload_FullMethodName = "/avatar.Avatar/CompleteAvatarUpload"
+	Avatar_UpdatePersonality_FullMethodName    = "/avatar.Avatar/UpdatePersonality"
 )
 
 // AvatarClient is the client API for Avatar service.
@@ -45,6 +46,8 @@ type AvatarClient interface {
 	GetAvatarUploadToken(ctx context.Context, in *GetAvatarUploadTokenRequest, opts ...grpc.CallOption) (*GetAvatarUploadTokenResponse, error)
 	// 完成头像上传
 	CompleteAvatarUpload(ctx context.Context, in *CompleteAvatarUploadRequest, opts ...grpc.CallOption) (*CompleteAvatarUploadResponse, error)
+	// 更新人格特征（由事件触发）
+	UpdatePersonality(ctx context.Context, in *UpdatePersonalityRequest, opts ...grpc.CallOption) (*UpdatePersonalityResponse, error)
 }
 
 type avatarClient struct {
@@ -115,6 +118,16 @@ func (c *avatarClient) CompleteAvatarUpload(ctx context.Context, in *CompleteAva
 	return out, nil
 }
 
+func (c *avatarClient) UpdatePersonality(ctx context.Context, in *UpdatePersonalityRequest, opts ...grpc.CallOption) (*UpdatePersonalityResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdatePersonalityResponse)
+	err := c.cc.Invoke(ctx, Avatar_UpdatePersonality_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AvatarServer is the server API for Avatar service.
 // All implementations must embed UnimplementedAvatarServer
 // for forward compatibility.
@@ -133,6 +146,8 @@ type AvatarServer interface {
 	GetAvatarUploadToken(context.Context, *GetAvatarUploadTokenRequest) (*GetAvatarUploadTokenResponse, error)
 	// 完成头像上传
 	CompleteAvatarUpload(context.Context, *CompleteAvatarUploadRequest) (*CompleteAvatarUploadResponse, error)
+	// 更新人格特征（由事件触发）
+	UpdatePersonality(context.Context, *UpdatePersonalityRequest) (*UpdatePersonalityResponse, error)
 	mustEmbedUnimplementedAvatarServer()
 }
 
@@ -160,6 +175,9 @@ func (UnimplementedAvatarServer) GetAvatarUploadToken(context.Context, *GetAvata
 }
 func (UnimplementedAvatarServer) CompleteAvatarUpload(context.Context, *CompleteAvatarUploadRequest) (*CompleteAvatarUploadResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CompleteAvatarUpload not implemented")
+}
+func (UnimplementedAvatarServer) UpdatePersonality(context.Context, *UpdatePersonalityRequest) (*UpdatePersonalityResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdatePersonality not implemented")
 }
 func (UnimplementedAvatarServer) mustEmbedUnimplementedAvatarServer() {}
 func (UnimplementedAvatarServer) testEmbeddedByValue()                {}
@@ -290,6 +308,24 @@ func _Avatar_CompleteAvatarUpload_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Avatar_UpdatePersonality_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdatePersonalityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AvatarServer).UpdatePersonality(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Avatar_UpdatePersonality_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AvatarServer).UpdatePersonality(ctx, req.(*UpdatePersonalityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Avatar_ServiceDesc is the grpc.ServiceDesc for Avatar service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -320,6 +356,10 @@ var Avatar_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CompleteAvatarUpload",
 			Handler:    _Avatar_CompleteAvatarUpload_Handler,
+		},
+		{
+			MethodName: "UpdatePersonality",
+			Handler:    _Avatar_UpdatePersonality_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -73,3 +73,9 @@ func (m *AvatarModel) UpdateProfile(avatarId int64, nickname, avatarUrl string) 
 	_, err := m.conn.Exec(query, nickname, avatarUrl, avatarId)
 	return err
 }
+
+func (m *AvatarModel) UpdatePersonality(avatarId int64, warmth, adventurous, social, creative, calm, energetic int32) error {
+	query := `UPDATE avatars SET warmth = ?, adventurous = ?, social = ?, creative = ?, calm = ?, energetic = ? WHERE avatar_id = ?`
+	_, err := m.conn.Exec(query, warmth, adventurous, social, creative, calm, energetic, avatarId)
+	return err
+}

@@ -58,3 +58,9 @@ func (s *AvatarServer) CompleteAvatarUpload(ctx context.Context, in *avatar.Comp
 	l := logic.NewCompleteAvatarUploadLogic(ctx, s.svcCtx)
 	return l.CompleteAvatarUpload(in)
 }
+
+// 更新人格特征（由事件触发）
+func (s *AvatarServer) UpdatePersonality(ctx context.Context, in *avatar.UpdatePersonalityRequest) (*avatar.UpdatePersonalityResponse, error) {
+	l := logic.NewUpdatePersonalityLogic(ctx, s.svcCtx)
+	return l.UpdatePersonality(in)
+}

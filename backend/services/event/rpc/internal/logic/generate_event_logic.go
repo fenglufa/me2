@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/me2/ai/rpc/ai"
-	"github.com/me2/avatar/rpc/avatar"
+	"github.com/me2/avatar/rpc/avatar_client"
 	"github.com/me2/event/rpc/event"
 	"github.com/me2/event/rpc/internal/model"
 	"github.com/me2/event/rpc/internal/svc"
@@ -44,7 +44,7 @@ func (l *GenerateEventLogic) GenerateEvent(in *event.GenerateEventRequest) (*eve
 	}
 
 	// 2. 获取分身信息
-	avatarInfo, err := l.svcCtx.AvatarRpc.GetAvatarInfo(l.ctx, &avatar.GetAvatarInfoRequest{
+	avatarInfo, err := l.svcCtx.AvatarRpc.GetAvatarInfo(l.ctx, &avatar_client.GetAvatarInfoRequest{
 		AvatarId: in.AvatarId,
 	})
 	if err != nil {
@@ -124,8 +124,15 @@ func (l *GenerateEventLogic) GenerateEvent(in *event.GenerateEventRequest) (*eve
 		OccurredAt:  time.Now(),
 	}
 
-	// PersonalityChanges 暂时为空，后续实现
-	eventHistory.PersonalityChanges = sql.NullString{Valid: false}
+	// 设置人格影响
+	if selectedTemplate.PersonalityImpact.Valid && selectedTemplate.PersonalityImpact.String != "" {
+		eventHistory.PersonalityChanges = sql.NullString{
+			String: selectedTemplate.PersonalityImpact.String,
+			Valid:  true,
+		}
+	} else {
+		eventHistory.PersonalityChanges = sql.NullString{Valid: false}
+	}
 
 	result, err := l.svcCtx.EventHistoryModel.Insert(eventHistory)
 	if err != nil {
@@ -139,10 +146,29 @@ func (l *GenerateEventLogic) GenerateEvent(in *event.GenerateEventRequest) (*eve
 		return nil, fmt.Errorf("获取事件ID失败")
 	}
 
+	// 8. 调用 Avatar Service 更新人格（失败不影响事件生成）
+	if eventHistory.PersonalityChanges.Valid {
+		// 创建独立的 context，设置 5 秒超时
+		updateCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		updateResp, err := l.svcCtx.AvatarRpc.UpdatePersonality(updateCtx, &avatar_client.UpdatePersonalityRequest{
+			AvatarId:           in.AvatarId,
+			EventId:            eventId,
+			PersonalityChanges: eventHistory.PersonalityChanges.String,
+		})
+		if err != nil {
+			l.Errorf("更新人格失败（不影响事件生成）: %v", err)
+		} else {
+			l.Infof("人格更新成功 (avatar_id=%d, event_id=%d), 变化前: %+v, 变化后: %+v",
+				in.AvatarId, eventId, updateResp.Before, updateResp.After)
+		}
+	}
+
 	l.Infof("成功生成事件 (event_id=%d, avatar_id=%d, type=%s, scene=%s)",
 		eventId, in.AvatarId, in.ActionType, sceneInfo.Scene.Name)
 
-	// 8. 返回结果
+	// 9. 返回结果
 	return &event.GenerateEventResponse{
 		EventId:    eventId,
 		EventType:  in.ActionType,

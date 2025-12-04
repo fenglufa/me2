@@ -22,6 +22,9 @@ service Avatar {
 
   // 完成头像上传
   rpc CompleteAvatarUpload(CompleteAvatarUploadRequest) returns (CompleteAvatarUploadResponse);
+
+  // 更新人格特征（由事件触发）
+  rpc UpdatePersonality(UpdatePersonalityRequest) returns (UpdatePersonalityResponse);
 }
 
 // 创建分身请求
@@ -128,4 +131,18 @@ message PersonalityInfo {
   int32 creative = 4;          // 创造性 0-100 (创造↔结构)
   int32 calm = 5;              // 情绪稳定性 0-100 (沉稳↔敏感)
   int32 energetic = 6;         // 生活动力 0-100 (活力↔温和)
+}
+
+// 更新人格特征请求
+message UpdatePersonalityRequest {
+  int64 avatar_id = 1;         // 分身ID
+  int64 event_id = 2;          // 触发事件ID
+  string personality_changes = 3; // 人格变化 JSON: {"warmth":2,"adventurous":3,...}
+}
+
+// 更新人格特征响应
+message UpdatePersonalityResponse {
+  bool success = 1;
+  PersonalityInfo before = 2;   // 变化前的人格
+  PersonalityInfo after = 3;    // 变化后的人格
 }
