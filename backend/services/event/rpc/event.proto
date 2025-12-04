@@ -1,0 +1,88 @@
+syntax = "proto3";
+
+package event;
+option go_package = "./event";
+
+// Event Service - 事件生成服务
+service Event {
+    // 生成事件
+    rpc GenerateEvent(GenerateEventRequest) returns (GenerateEventResponse);
+
+    // 获取事件时间线
+    rpc GetEventTimeline(GetEventTimelineRequest) returns (GetEventTimelineResponse);
+
+    // 获取事件详情
+    rpc GetEventDetail(GetEventDetailRequest) returns (GetEventDetailResponse);
+
+    // 获取模板列表（后续可用于管理后台）
+    rpc GetTemplates(GetTemplatesRequest) returns (GetTemplatesResponse);
+}
+
+// ==================== GenerateEvent ====================
+
+message GenerateEventRequest {
+    int64 avatar_id = 1;        // 分身ID
+    string action_type = 2;      // 行为类型: exploration/social/study/creative/rest/play
+    int64 scene_id = 3;          // 场景ID
+    string scene_name = 4;       // 场景名称
+}
+
+message GenerateEventResponse {
+    int64 event_id = 1;          // 事件ID
+    string event_type = 2;       // 事件类型
+    string event_title = 3;      // 事件标题
+    string event_text = 4;       // 事件内容
+    string image_url = 5;        // 图片URL（暂时为空）
+}
+
+// ==================== GetEventTimeline ====================
+
+message GetEventTimelineRequest {
+    int64 avatar_id = 1;         // 分身ID
+    int32 page = 2;              // 页码（从1开始）
+    int32 page_size = 3;         // 每页数量
+}
+
+message GetEventTimelineResponse {
+    repeated EventInfo events = 1;  // 事件列表
+    int32 total = 2;                // 总数
+}
+
+message EventInfo {
+    int64 event_id = 1;
+    string event_type = 2;
+    string event_title = 3;
+    string event_text = 4;
+    string image_url = 5;
+    string scene_name = 6;
+    string occurred_at = 7;          // 发生时间
+}
+
+// ==================== GetEventDetail ====================
+
+message GetEventDetailRequest {
+    int64 event_id = 1;              // 事件ID
+}
+
+message GetEventDetailResponse {
+    EventInfo event = 1;
+}
+
+// ==================== GetTemplates ====================
+
+message GetTemplatesRequest {
+    string category = 1;             // 分类筛选（可选）
+    string rarity = 2;               // 稀有度筛选（可选）
+}
+
+message GetTemplatesResponse {
+    repeated TemplateInfo templates = 1;
+}
+
+message TemplateInfo {
+    int64 template_id = 1;
+    string category = 2;
+    string name = 3;
+    string description = 4;
+    string rarity = 5;
+}
