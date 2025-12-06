@@ -35,7 +35,10 @@
       "Bash(elif [ -f \"../$service/go.mod\" ])",
       "Bash(then head -1 \"../$service/go.mod\")",
       "Bash(fi)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(flutter create:*)",
+      "Bash(flutter pub get:*)",
+      "Bash(flutter pub run build_runner:*)"
     ],
     "deny": [],
     "ask": []
