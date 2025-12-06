@@ -52,3 +52,9 @@ func (s *DiaryServer) GetDiaryStats(ctx context.Context, in *diary.GetDiaryStats
 	l := logic.NewGetDiaryStatsLogic(ctx, s.svcCtx)
 	return l.GetDiaryStats(in)
 }
+
+// 获取日记详情
+func (s *DiaryServer) GetDiary(ctx context.Context, in *diary.GetDiaryRequest) (*diary.GetDiaryResponse, error) {
+	l := logic.NewGetDiaryLogic(ctx, s.svcCtx)
+	return l.GetDiary(in)
+}

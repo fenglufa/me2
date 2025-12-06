@@ -19,6 +19,9 @@ service Diary {
 
   // 获取日记统计
   rpc GetDiaryStats(GetDiaryStatsRequest) returns (GetDiaryStatsResponse);
+
+  // 获取日记详情
+  rpc GetDiary(GetDiaryRequest) returns (GetDiaryResponse);
 }
 
 // 日记信息
@@ -107,4 +110,13 @@ message GetDiaryStatsResponse {
   int64 total_words = 5;            // 总字数
   string first_diary_date = 6;      // 第一篇日记日期
   string last_diary_date = 7;       // 最后一篇日记日期
+}
+
+// 获取日记详情
+message GetDiaryRequest {
+  int64 diary_id = 1;
+}
+
+message GetDiaryResponse {
+  DiaryInfo diary = 1;
 }

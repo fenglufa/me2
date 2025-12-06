@@ -21,6 +21,8 @@ type (
 	GenerateAvatarDiaryResponse = diary.GenerateAvatarDiaryResponse
 	GetAvatarDiaryListRequest   = diary.GetAvatarDiaryListRequest
 	GetAvatarDiaryListResponse  = diary.GetAvatarDiaryListResponse
+	GetDiaryRequest             = diary.GetDiaryRequest
+	GetDiaryResponse            = diary.GetDiaryResponse
 	GetDiaryStatsRequest        = diary.GetDiaryStatsRequest
 	GetDiaryStatsResponse       = diary.GetDiaryStatsResponse
 	GetUserDiaryListRequest     = diary.GetUserDiaryListRequest
@@ -37,6 +39,8 @@ type (
 		GetUserDiaryList(ctx context.Context, in *GetUserDiaryListRequest, opts ...grpc.CallOption) (*GetUserDiaryListResponse, error)
 		// 获取日记统计
 		GetDiaryStats(ctx context.Context, in *GetDiaryStatsRequest, opts ...grpc.CallOption) (*GetDiaryStatsResponse, error)
+		// 获取日记详情
+		GetDiary(ctx context.Context, in *GetDiaryRequest, opts ...grpc.CallOption) (*GetDiaryResponse, error)
 	}
 
 	defaultDiary struct {
@@ -78,4 +82,10 @@ func (m *defaultDiary) GetUserDiaryList(ctx context.Context, in *GetUserDiaryLis
 func (m *defaultDiary) GetDiaryStats(ctx context.Context, in *GetDiaryStatsRequest, opts ...grpc.CallOption) (*GetDiaryStatsResponse, error) {
 	client := diary.NewDiaryClient(m.cli.Conn())
 	return client.GetDiaryStats(ctx, in, opts...)
+}
+
+// 获取日记详情
+func (m *defaultDiary) GetDiary(ctx context.Context, in *GetDiaryRequest, opts ...grpc.CallOption) (*GetDiaryResponse, error) {
+	client := diary.NewDiaryClient(m.cli.Conn())
+	return client.GetDiary(ctx, in, opts...)
 }

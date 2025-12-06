@@ -24,6 +24,7 @@ const (
 	Diary_CreateUserDiary_FullMethodName     = "/diary.Diary/CreateUserDiary"
 	Diary_GetUserDiaryList_FullMethodName    = "/diary.Diary/GetUserDiaryList"
 	Diary_GetDiaryStats_FullMethodName       = "/diary.Diary/GetDiaryStats"
+	Diary_GetDiary_FullMethodName            = "/diary.Diary/GetDiary"
 )
 
 // DiaryClient is the client API for Diary service.
@@ -42,6 +43,8 @@ type DiaryClient interface {
 	GetUserDiaryList(ctx context.Context, in *GetUserDiaryListRequest, opts ...grpc.CallOption) (*GetUserDiaryListResponse, error)
 	// 获取日记统计
 	GetDiaryStats(ctx context.Context, in *GetDiaryStatsRequest, opts ...grpc.CallOption) (*GetDiaryStatsResponse, error)
+	// 获取日记详情
+	GetDiary(ctx context.Context, in *GetDiaryRequest, opts ...grpc.CallOption) (*GetDiaryResponse, error)
 }
 
 type diaryClient struct {
@@ -102,6 +105,16 @@ func (c *diaryClient) GetDiaryStats(ctx context.Context, in *GetDiaryStatsReques
 	return out, nil
 }
 
+func (c *diaryClient) GetDiary(ctx context.Context, in *GetDiaryRequest, opts ...grpc.CallOption) (*GetDiaryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetDiaryResponse)
+	err := c.cc.Invoke(ctx, Diary_GetDiary_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DiaryServer is the server API for Diary service.
 // All implementations must embed UnimplementedDiaryServer
 // for forward compatibility.
@@ -118,6 +131,8 @@ type DiaryServer interface {
 	GetUserDiaryList(context.Context, *GetUserDiaryListRequest) (*GetUserDiaryListResponse, error)
 	// 获取日记统计
 	GetDiaryStats(context.Context, *GetDiaryStatsRequest) (*GetDiaryStatsResponse, error)
+	// 获取日记详情
+	GetDiary(context.Context, *GetDiaryRequest) (*GetDiaryResponse, error)
 	mustEmbedUnimplementedDiaryServer()
 }
 
@@ -142,6 +157,9 @@ func (UnimplementedDiaryServer) GetUserDiaryList(context.Context, *GetUserDiaryL
 }
 func (UnimplementedDiaryServer) GetDiaryStats(context.Context, *GetDiaryStatsRequest) (*GetDiaryStatsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetDiaryStats not implemented")
+}
+func (UnimplementedDiaryServer) GetDiary(context.Context, *GetDiaryRequest) (*GetDiaryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetDiary not implemented")
 }
 func (UnimplementedDiaryServer) mustEmbedUnimplementedDiaryServer() {}
 func (UnimplementedDiaryServer) testEmbeddedByValue()               {}
@@ -254,6 +272,24 @@ func _Diary_GetDiaryStats_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Diary_GetDiary_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDiaryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DiaryServer).GetDiary(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Diary_GetDiary_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DiaryServer).GetDiary(ctx, req.(*GetDiaryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Diary_ServiceDesc is the grpc.ServiceDesc for Diary service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -280,6 +316,10 @@ var Diary_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetDiaryStats",
 			Handler:    _Diary_GetDiaryStats_Handler,
+		},
+		{
+			MethodName: "GetDiary",
+			Handler:    _Diary_GetDiary_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
