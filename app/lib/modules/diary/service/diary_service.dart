@@ -38,4 +38,9 @@ class DiaryService {
     );
     return Diary.fromJson(response.data);
   }
+
+  Future<Diary> getDiary(int diaryId) async {
+    final response = await _dio.get('${ApiEndpoints.diaryStats.replaceAll('/stats', '')}/$diaryId');
+    return Diary.fromJson(response.data);
+  }
 }

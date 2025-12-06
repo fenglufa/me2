@@ -14,6 +14,7 @@ Diary _$DiaryFromJson(Map<String, dynamic> json) => Diary(
       title: json['title'] as String,
       content: json['content'] as String,
       mood: json['mood'] as String,
+      replyContent: json['reply_content'] as String?,
       createdAt: (json['created_at'] as num).toInt(),
     );
 
@@ -25,6 +26,7 @@ Map<String, dynamic> _$DiaryToJson(Diary instance) => <String, dynamic>{
       'title': instance.title,
       'content': instance.content,
       'mood': instance.mood,
+      'reply_content': instance.replyContent,
       'created_at': instance.createdAt,
     };
 

@@ -12,6 +12,8 @@ class Diary {
   final String title;
   final String content;
   final String mood;
+  @JsonKey(name: 'reply_content')
+  final String? replyContent;
   @JsonKey(name: 'created_at')
   final int createdAt;
 
@@ -23,6 +25,7 @@ class Diary {
     required this.title,
     required this.content,
     required this.mood,
+    this.replyContent,
     required this.createdAt,
   });
 
