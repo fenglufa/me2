@@ -58,6 +58,8 @@ dependencies:
   # Image
   image_picker: ^1.0.7
   permission_handler: ^11.3.0
+  http_parser: ^4.0.2
+  path: ^1.8.3
 
   # Utils
   logger: ^2.0.0

@@ -39,5 +39,9 @@ func (l *GetAvatarTokenLogic) GetAvatarToken() (resp *types.AvatarTokenResponse,
 		Token:     rpcResp.CompleteToken,
 		UploadUrl: rpcResp.Host,
 		Key:       rpcResp.Key,
+		Accessid:  rpcResp.AccessKeyId,
+		Policy:    rpcResp.Policy,
+		Signature: rpcResp.Signature,
+		Dir:       rpcResp.Key,
 	}, nil
 }

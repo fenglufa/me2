@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/utils/image_picker_service.dart';
+import '../../../core/utils/oss_upload_service.dart';
 import '../../user/controller/user_controller.dart';
 import '../../user/service/user_service.dart';
 
@@ -55,15 +56,16 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     });
 
     try {
-      final userService = UserService();
       String? avatarUrl;
 
       // Upload avatar if selected
       if (_selectedImage != null) {
-        avatarUrl = await userService.uploadAvatar(File(_selectedImage!.path));
+        final ossService = ref.read(ossUploadServiceProvider);
+        avatarUrl = await ossService.uploadAvatar(File(_selectedImage!.path));
       }
 
       // Update user info
+      final userService = UserService();
       await userService.updateUser(
         nickname: _nicknameController.text.trim().isEmpty ? null : _nicknameController.text.trim(),
         avatarUrl: avatarUrl,

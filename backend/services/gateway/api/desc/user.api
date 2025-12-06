@@ -48,11 +48,16 @@ type (
 		Token     string `json:"token"`
 		UploadUrl string `json:"upload_url"`
 		Key       string `json:"key"`
+		Accessid  string `json:"accessid"`
+		Policy    string `json:"policy"`
+		Signature string `json:"signature"`
+		Dir       string `json:"dir"`
 	}
 
 	// 完成头像上传请求
 	AvatarCompleteRequest {
-		Key string `json:"key"`
+		Key   string `json:"key"`
+		Token string `json:"token"`
 	}
 
 	// 完成头像上传响应
