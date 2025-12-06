@@ -67,7 +67,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     ref.listen(authControllerProvider, (previous, next) {
       next.whenData((data) {
         if (data != null) {
-          context.go('/home');
+          context.go('/main');
         }
       });
     });
