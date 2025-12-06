@@ -36,7 +36,10 @@ func (l *GetUserInfoLogic) GetUserInfo() (resp *types.UserInfoResponse, err erro
 	return &types.UserInfoResponse{
 		UserId:           rpcResp.UserId,
 		Phone:            rpcResp.Phone,
+		Nickname:         rpcResp.Nickname,
+		AvatarUrl:        rpcResp.Avatar,
 		SubscriptionTier: rpcResp.SubscriptionType,
+		Status:           rpcResp.Status,
 		CreatedAt:        rpcResp.CreatedAt,
 	}, nil
 }
