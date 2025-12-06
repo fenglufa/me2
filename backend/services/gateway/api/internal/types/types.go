@@ -103,14 +103,15 @@ type DiaryListResponse struct {
 }
 
 type DiaryResponse struct {
-	Id        int64  `json:"id"`
-	AvatarId  int64  `json:"avatar_id"`
-	Type      string `json:"type"`
-	Date      string `json:"date"`
-	Title     string `json:"title"`
-	Content   string `json:"content"`
-	Mood      string `json:"mood"`
-	CreatedAt int64  `json:"created_at"`
+	Id           int64  `json:"id"`
+	AvatarId     int64  `json:"avatar_id"`
+	Type         string `json:"type"`
+	Date         string `json:"date"`
+	Title        string `json:"title"`
+	Content      string `json:"content"`
+	Mood         string `json:"mood"`
+	ReplyContent string `json:"reply_content,optional"`
+	CreatedAt    int64  `json:"created_at"`
 }
 
 type DiaryStatsResponse struct {
