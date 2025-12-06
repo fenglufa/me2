@@ -73,7 +73,7 @@ class ProfilePage extends ConsumerWidget {
           ),
           IconButton(
             icon: const Icon(Icons.edit_outlined),
-            onPressed: () {},
+            onPressed: () => context.push('/edit-profile'),
           ),
           IconButton(
             icon: const Icon(Icons.settings_outlined),

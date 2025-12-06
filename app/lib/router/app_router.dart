@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../modules/auth/view/login_page.dart';
 import '../modules/main/view/main_page.dart';
 import '../modules/settings/view/settings_page.dart';
+import '../modules/profile/view/edit_profile_page.dart';
 import '../core/storage/token_storage.dart';
 
 final appRouter = GoRouter(
@@ -32,6 +32,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/settings',
       builder: (context, state) => const SettingsPage(),
+    ),
+    GoRoute(
+      path: '/edit-profile',
+      builder: (context, state) => const EditProfilePage(),
     ),
   ],
 );

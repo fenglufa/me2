@@ -12,6 +12,8 @@ class ApiEndpoints {
   static const String createAvatar = '/api/v1/avatar/create';
   static const String myAvatar = '/api/v1/avatar/my';
   static const String avatarDetail = '/api/v1/avatar';
+  static const String avatarUploadToken = '/api/v1/user/avatar-token';
+  static const String completeAvatarUpload = '/api/v1/user/avatar-complete';
 
   // World
   static const String maps = '/api/v1/world/maps';
