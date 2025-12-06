@@ -13,7 +13,6 @@ class LoginPage extends ConsumerStatefulWidget {
 class _LoginPageState extends ConsumerState<LoginPage> {
   final _phoneController = TextEditingController();
   final _codeController = TextEditingController();
-  bool _codeSent = false;
 
   @override
   void dispose() {
@@ -33,7 +32,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     try {
       await ref.read(authControllerProvider.notifier).sendCode(phone);
-      setState(() => _codeSent = true);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('验证码已发送')),
@@ -95,36 +93,40 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 keyboardType: TextInputType.phone,
               ),
               const SizedBox(height: 16),
-              if (_codeSent) ...[
-                TextField(
-                  controller: _codeController,
-                  decoration: const InputDecoration(
-                    labelText: '验证码',
-                    border: OutlineInputBorder(),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _codeController,
+                      decoration: const InputDecoration(
+                        labelText: '验证码',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
                   ),
-                  keyboardType: TextInputType.number,
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: authState.isLoading ? null : _login,
-                    child: authState.isLoading
-                        ? const CircularProgressIndicator()
-                        : const Text('登录'),
+                  const SizedBox(width: 12),
+                  SizedBox(
+                    width: 120,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: _sendCode,
+                      child: const Text('获取验证码'),
+                    ),
                   ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: authState.isLoading ? null : _login,
+                  child: authState.isLoading
+                      ? const CircularProgressIndicator()
+                      : const Text('登录'),
                 ),
-              ] else ...[
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: _sendCode,
-                    child: const Text('发送验证码'),
-                  ),
-                ),
-              ],
+              ),
             ],
           ),
         ),

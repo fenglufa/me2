@@ -38,7 +38,8 @@
       "Bash(done)",
       "Bash(flutter create:*)",
       "Bash(flutter pub get:*)",
-      "Bash(flutter pub run build_runner:*)"
+      "Bash(flutter pub run build_runner:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []
