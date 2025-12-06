@@ -1,0 +1,74 @@
+syntax = "v1"
+
+type (
+	// 日记响应
+	DiaryResponse {
+		Id      int64  `json:"id"`
+		AvatarId int64  `json:"avatar_id"`
+		Type    string `json:"type"`
+		Date    string `json:"date"`
+		Title   string `json:"title"`
+		Content string `json:"content"`
+		Mood    string `json:"mood"`
+		CreatedAt int64 `json:"created_at"`
+	}
+
+	// 获取日记请求
+	GetDiaryRequest {
+		Id int64 `path:"id"`
+	}
+
+	// 日记列表请求
+	DiaryListRequest {
+		Page     int `form:"page,default=1"`
+		PageSize int `form:"page_size,default=20"`
+	}
+
+	// 日记列表响应
+	DiaryListResponse {
+		Total    int64           `json:"total"`
+		Page     int             `json:"page"`
+		PageSize int             `json:"page_size"`
+		List     []DiaryResponse `json:"list"`
+	}
+
+	// 创建用户日记请求
+	CreateUserDiaryRequest {
+		Content string `json:"content"`
+		Mood    string `json:"mood,optional"`
+	}
+
+	// 日记统计响应
+	DiaryStatsResponse {
+		TotalCount  int64 `json:"total_count"`
+		AvatarCount int64 `json:"avatar_count"`
+		UserCount   int64 `json:"user_count"`
+	}
+)
+
+@server (
+	group:      diary
+	prefix:     /api/v1/diary
+	middleware: Auth
+)
+service gateway {
+	@doc "获取分身日记列表"
+	@handler getAvatarDiaries
+	get /avatar (DiaryListRequest) returns (DiaryListResponse)
+
+	@doc "获取用户日记列表"
+	@handler getUserDiaries
+	get /user (DiaryListRequest) returns (DiaryListResponse)
+
+	@doc "创建用户日记"
+	@handler createUserDiary
+	post /user (CreateUserDiaryRequest) returns (DiaryResponse)
+
+	@doc "获取日记详情"
+	@handler getDiary
+	get /:id (GetDiaryRequest) returns (DiaryResponse)
+
+	@doc "获取日记统计"
+	@handler getDiaryStats
+	get /stats returns (DiaryStatsResponse)
+}

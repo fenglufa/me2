@@ -1,0 +1,132 @@
+syntax = "v1"
+
+info (
+	title:   "用户服务 API"
+	desc:    "用户认证、登录、信息管理"
+	author:  "ME2 Team"
+	version: "v1.0"
+)
+
+type (
+	// 发送验证码请求
+	SendCodeRequest {
+		Phone string `json:"phone"`
+	}
+
+	// 登录请求
+	LoginRequest {
+		Phone string `json:"phone"`
+		Code  string `json:"code"`
+	}
+
+	// 登录响应
+	LoginResponse {
+		Token    string `json:"token"`
+		UserId   int64  `json:"user_id"`
+		AvatarId int64  `json:"avatar_id,omitempty"`
+	}
+
+	// 用户信息响应
+	UserInfoResponse {
+		UserId           int64  `json:"user_id"`
+		Phone            string `json:"phone"`
+		Nickname         string `json:"nickname"`
+		AvatarUrl        string `json:"avatar_url"`
+		SubscriptionTier int32  `json:"subscription_tier"`
+		Status           int32  `json:"status"`
+		CreatedAt        int64  `json:"created_at"`
+	}
+
+	// 更新用户信息请求
+	UpdateUserRequest {
+		Nickname  string `json:"nickname,optional"`
+		AvatarUrl string `json:"avatar_url,optional"`
+	}
+
+	// 头像上传凭证响应
+	AvatarTokenResponse {
+		Token     string `json:"token"`
+		UploadUrl string `json:"upload_url"`
+		Key       string `json:"key"`
+	}
+
+	// 完成头像上传请求
+	AvatarCompleteRequest {
+		Key string `json:"key"`
+	}
+
+	// 完成头像上传响应
+	AvatarCompleteResponse {
+		AvatarUrl string `json:"avatar_url"`
+	}
+
+	// 订阅信息响应
+	SubscriptionResponse {
+		UserId           int64  `json:"user_id"`
+		SubscriptionTier int32  `json:"subscription_tier"`
+		ExpiresAt        int64  `json:"expires_at,omitempty"`
+		AutoRenew        bool   `json:"auto_renew"`
+	}
+
+	// 更新订阅请求
+	UpdateSubscriptionRequest {
+		UserId           int64 `json:"user_id"`
+		SubscriptionTier int32 `json:"subscription_tier"`
+		ExpiresAt        int64 `json:"expires_at,optional"`
+	}
+
+	// 更新用户状态请求
+	UpdateUserStatusRequest {
+		UserId int64 `json:"user_id"`
+		Status int32 `json:"status"`
+	}
+)
+
+@server (
+	group:  user
+	prefix: /api/v1/user
+)
+service gateway {
+	@doc "发送验证码"
+	@handler sendCode
+	post /send-code (SendCodeRequest)
+
+	@doc "用户登录"
+	@handler login
+	post /login (LoginRequest) returns (LoginResponse)
+}
+
+@server (
+	group:      user
+	prefix:     /api/v1/user
+	middleware: Auth
+)
+service gateway {
+	@doc "获取用户信息"
+	@handler getUserInfo
+	get /info returns (UserInfoResponse)
+
+	@doc "更新用户信息"
+	@handler updateUser
+	put /update (UpdateUserRequest) returns (UserInfoResponse)
+
+	@doc "获取头像上传凭证"
+	@handler getAvatarToken
+	get /avatar-token returns (AvatarTokenResponse)
+
+	@doc "完成头像上传"
+	@handler completeAvatar
+	post /avatar-complete (AvatarCompleteRequest) returns (AvatarCompleteResponse)
+
+	@doc "获取订阅信息"
+	@handler getSubscription
+	get /subscription returns (SubscriptionResponse)
+
+	@doc "更新订阅"
+	@handler updateSubscription
+	put /subscription (UpdateSubscriptionRequest) returns (SubscriptionResponse)
+
+	@doc "更新用户状态"
+	@handler updateUserStatus
+	put /status (UpdateUserStatusRequest)
+}

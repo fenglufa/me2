@@ -25,7 +25,17 @@
       "Bash(make run-dev:*)",
       "Bash(go build:*)",
       "Bash(find:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(make gen-api:*)",
+      "Bash(timeout 30 go mod tidy:*)",
+      "Bash(for service in user avatar world event action diary)",
+      "Bash(do echo \"=== $service ===\")",
+      "Bash(if [ -f \"../$service/rpc/go.mod\" ])",
+      "Bash(then head -1 \"../$service/rpc/go.mod\")",
+      "Bash(elif [ -f \"../$service/go.mod\" ])",
+      "Bash(then head -1 \"../$service/go.mod\")",
+      "Bash(fi)",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": []

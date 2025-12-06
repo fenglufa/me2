@@ -1,0 +1,163 @@
+syntax = "v1"
+
+type (
+	// ========== 世界地图 ==========
+
+	WorldMapResponse {
+		Id          int64  `json:"id"`
+		Name        string `json:"name"`
+		Description string `json:"description"`
+		CoverImage  string `json:"cover_image"`
+		IsActive    bool   `json:"is_active"`
+		CreatedAt   int64  `json:"created_at"`
+	}
+
+	GetMapRequest {
+		Id int64 `path:"id"`
+	}
+
+	MapListRequest {
+		Page       int  `form:"page,default=1"`
+		PageSize   int  `form:"page_size,default=20"`
+		OnlyActive bool `form:"only_active,optional"`
+	}
+
+	MapListResponse {
+		Total    int64              `json:"total"`
+		Page     int                `json:"page"`
+		PageSize int                `json:"page_size"`
+		List     []WorldMapResponse `json:"list"`
+	}
+
+	// ========== 区域 ==========
+
+	WorldRegionResponse {
+		Id          int64    `json:"id"`
+		MapId       int64    `json:"map_id"`
+		Name        string   `json:"name"`
+		Description string   `json:"description"`
+		CoverImage  string   `json:"cover_image"`
+		Atmosphere  string   `json:"atmosphere"`
+		Tags        []string `json:"tags"`
+		IsActive    bool     `json:"is_active"`
+		CreatedAt   int64    `json:"created_at"`
+	}
+
+	GetRegionRequest {
+		Id int64 `path:"id"`
+	}
+
+	RegionListRequest {
+		MapId      int64 `form:"map_id"`
+		Page       int   `form:"page,default=1"`
+		PageSize   int   `form:"page_size,default=20"`
+		OnlyActive bool  `form:"only_active,optional"`
+	}
+
+	RegionListResponse {
+		Total    int64                 `json:"total"`
+		Page     int                   `json:"page"`
+		PageSize int                   `json:"page_size"`
+		List     []WorldRegionResponse `json:"list"`
+	}
+
+	// ========== 场景 ==========
+
+	SceneFeaturesResponse {
+		HasWifi      bool `json:"has_wifi"`
+		HasFood      bool `json:"has_food"`
+		HasSeating   bool `json:"has_seating"`
+		IsIndoor     bool `json:"is_indoor"`
+		IsQuiet      bool `json:"is_quiet"`
+		ComfortLevel int  `json:"comfort_level"`
+		SocialLevel  int  `json:"social_level"`
+	}
+
+	WorldSceneResponse {
+		Id              int64                 `json:"id"`
+		RegionId        int64                 `json:"region_id"`
+		Name            string                `json:"name"`
+		Description     string                `json:"description"`
+		CoverImage      string                `json:"cover_image"`
+		Atmosphere      string                `json:"atmosphere"`
+		Tags            []string              `json:"tags"`
+		SuitableActions []string              `json:"suitable_actions"`
+		Capacity        int                   `json:"capacity"`
+		IsActive        bool                  `json:"is_active"`
+		Features        SceneFeaturesResponse `json:"features"`
+		CreatedAt       int64                 `json:"created_at"`
+	}
+
+	GetSceneRequest {
+		Id int64 `path:"id"`
+	}
+
+	SceneListRequest {
+		RegionId   int64    `form:"region_id"`
+		Page       int      `form:"page,default=1"`
+		PageSize   int      `form:"page_size,default=20"`
+		OnlyActive bool     `form:"only_active,optional"`
+		Tags       []string `form:"tags,optional"`
+	}
+
+	SceneListResponse {
+		Total    int64                `json:"total"`
+		Page     int                  `json:"page"`
+		PageSize int                  `json:"page_size"`
+		List     []WorldSceneResponse `json:"list"`
+	}
+
+	// ========== 行为推荐 ==========
+
+	SceneRecommendationRequest {
+		ActionType string `form:"action_type"`
+		MapId      int64  `form:"map_id,optional"`
+		RegionId   int64  `form:"region_id,optional"`
+		Limit      int    `form:"limit,default=10"`
+	}
+
+	SceneRecommendationItem {
+		Scene      WorldSceneResponse `json:"scene"`
+		MatchScore float64            `json:"match_score"`
+		Reason     string             `json:"reason"`
+	}
+
+	SceneRecommendationResponse {
+		Recommendations []SceneRecommendationItem `json:"recommendations"`
+	}
+)
+
+@server (
+	group:      world
+	prefix:     /api/v1/world
+	middleware: Auth
+)
+service gateway {
+	@doc "获取世界地图列表"
+	@handler listMaps
+	get /maps (MapListRequest) returns (MapListResponse)
+
+	@doc "获取世界地图详情"
+	@handler getMap
+	get /maps/:id (GetMapRequest) returns (WorldMapResponse)
+
+	@doc "获取地图的区域列表"
+	@handler listRegions
+	get /regions (RegionListRequest) returns (RegionListResponse)
+
+	@doc "获取区域详情"
+	@handler getRegion
+	get /regions/:id (GetRegionRequest) returns (WorldRegionResponse)
+
+	@doc "获取区域内的场景列表"
+	@handler listScenes
+	get /scenes (SceneListRequest) returns (SceneListResponse)
+
+	@doc "获取场景详情"
+	@handler getScene
+	get /scenes/:id (GetSceneRequest) returns (WorldSceneResponse)
+
+	@doc "根据行为类型推荐场景"
+	@handler recommendScenes
+	get /recommend (SceneRecommendationRequest) returns (SceneRecommendationResponse)
+}

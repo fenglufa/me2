@@ -1,0 +1,61 @@
+syntax = "v1"
+
+type (
+	// ========== 行动意图 ==========
+
+	ActionIntentItem {
+		ActionType string  `json:"action_type"`
+		Score      float64 `json:"score"`
+		Reason     string  `json:"reason"`
+	}
+
+	ActionIntentResponse {
+		Intents        []ActionIntentItem `json:"intents"`
+		SelectedAction string             `json:"selected_action"`
+	}
+
+	// ========== 行动记录 ==========
+
+	ActionLogResponse {
+		Id            int64   `json:"id"`
+		AvatarId      int64   `json:"avatar_id"`
+		ActionType    string  `json:"action_type"`
+		SceneId       int64   `json:"scene_id"`
+		SceneName     string  `json:"scene_name"`
+		IntentScore   float64 `json:"intent_score"`
+		TriggerReason string  `json:"trigger_reason"`
+		EventId       int64   `json:"event_id,omitempty"`
+		CreatedAt     int64   `json:"created_at"`
+	}
+
+	ActionHistoryRequest {
+		Page     int `form:"page,default=1"`
+		PageSize int `form:"page_size,default=20"`
+	}
+
+	ActionHistoryResponse {
+		Total    int64               `json:"total"`
+		Page     int                 `json:"page"`
+		PageSize int                 `json:"page_size"`
+		List     []ActionLogResponse `json:"list"`
+	}
+)
+
+@server (
+	group:      action
+	prefix:     /api/v1/action
+	middleware: Auth
+)
+service gateway {
+	@doc "计算分身行动意图"
+	@handler calculateIntent
+	get /intent returns (ActionIntentResponse)
+
+	@doc "获取分身行动历史"
+	@handler getHistory
+	get /history (ActionHistoryRequest) returns (ActionHistoryResponse)
+
+	@doc "获取最近一次行动"
+	@handler getLastAction
+	get /last returns (ActionLogResponse)
+}

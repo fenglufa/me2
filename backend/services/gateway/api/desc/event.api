@@ -1,0 +1,49 @@
+syntax = "v1"
+
+type (
+	// 事件响应
+	EventResponse {
+		Id          int64  `json:"id"`
+		AvatarId    int64  `json:"avatar_id"`
+		EventType   string `json:"event_type"`
+		EventText   string `json:"event_text"`
+		ImageUrl    string `json:"image_url"`
+		SceneId     int64  `json:"scene_id"`
+		SceneName   string `json:"scene_name"`
+		OccurredAt  int64  `json:"occurred_at"`
+	}
+
+	// 获取事件请求
+	GetEventRequest {
+		Id int64 `path:"id"`
+	}
+
+	// 事件列表请求
+	EventListRequest {
+		Page     int `form:"page,default=1"`
+		PageSize int `form:"page_size,default=20"`
+	}
+
+	// 事件列表响应
+	EventListResponse {
+		Total    int64           `json:"total"`
+		Page     int             `json:"page"`
+		PageSize int             `json:"page_size"`
+		List     []EventResponse `json:"list"`
+	}
+)
+
+@server (
+	group:      event
+	prefix:     /api/v1/events
+	middleware: Auth
+)
+service gateway {
+	@doc "获取分身事件时间线"
+	@handler getEventTimeline
+	get /timeline (EventListRequest) returns (EventListResponse)
+
+	@doc "获取事件详情"
+	@handler getEvent
+	get /:id (GetEventRequest) returns (EventResponse)
+}

@@ -1,0 +1,15 @@
+syntax = "v1"
+
+info (
+	title:   "ME2 API Gateway"
+	desc:    "ME2 项目统一 API 网关"
+	author:  "ME2 Team"
+	version: "v1.0"
+)
+
+import "desc/user.api"
+import "desc/avatar.api"
+import "desc/world.api"
+import "desc/event.api"
+import "desc/action.api"
+import "desc/diary.api"

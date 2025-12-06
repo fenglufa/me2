@@ -1,0 +1,22 @@
+package action
+
+import (
+	"net/http"
+
+	"github.com/me2/gateway/api/internal/logic/action"
+	"github.com/me2/gateway/api/internal/svc"
+	"github.com/zeromicro/go-zero/rest/httpx"
+)
+
+// 计算分身行动意图
+func CalculateIntentHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		l := action.NewCalculateIntentLogic(r.Context(), svcCtx)
+		resp, err := l.CalculateIntent()
+		if err != nil {
+			httpx.ErrorCtx(r.Context(), w, err)
+		} else {
+			httpx.OkJsonCtx(r.Context(), w, resp)
+		}
+	}
+}

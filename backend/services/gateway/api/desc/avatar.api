@@ -1,0 +1,99 @@
+syntax = "v1"
+
+type (
+	// 创建分身请求
+	CreateAvatarRequest {
+		Name      string `json:"name"`
+		AvatarUrl string `json:"avatar_url"`
+	}
+
+	// 获取分身请求
+	GetAvatarRequest {
+		Id int64 `path:"id"`
+	}
+
+	// 分身响应
+	AvatarResponse {
+		Id         int64   `json:"id"`
+		UserId     int64   `json:"user_id"`
+		Name       string  `json:"name"`
+		AvatarUrl  string  `json:"avatar_url"`
+		Warmth     float64 `json:"warmth"`
+		Adventurous float64 `json:"adventurous"`
+		Social     float64 `json:"social"`
+		Creative   float64 `json:"creative"`
+		Calm       float64 `json:"calm"`
+		Energetic  float64 `json:"energetic"`
+		CreatedAt  int64   `json:"created_at"`
+	}
+
+	// 更新分身资料请求
+	UpdateAvatarRequest {
+		Id        int64  `path:"id"`
+		Name      string `json:"name,optional"`
+		AvatarUrl string `json:"avatar_url,optional"`
+	}
+
+	// 分身头像上传凭证响应
+	AvatarUploadTokenResponse {
+		Token     string `json:"token"`
+		UploadUrl string `json:"upload_url"`
+		Key       string `json:"key"`
+	}
+
+	// 完成分身头像上传请求
+	AvatarUploadCompleteRequest {
+		Key string `json:"key"`
+	}
+
+	// 完成分身头像上传响应
+	AvatarUploadCompleteResponse {
+		AvatarUrl string `json:"avatar_url"`
+	}
+
+	// 更新性格请求
+	UpdatePersonalityRequest {
+		Id          int64   `path:"id"`
+		Warmth      float64 `json:"warmth,optional"`
+		Adventurous float64 `json:"adventurous,optional"`
+		Social      float64 `json:"social,optional"`
+		Creative    float64 `json:"creative,optional"`
+		Calm        float64 `json:"calm,optional"`
+		Energetic   float64 `json:"energetic,optional"`
+	}
+)
+
+@server (
+	group:      avatar
+	prefix:     /api/v1/avatar
+	middleware: Auth
+)
+service gateway {
+	@doc "创建分身"
+	@handler createAvatar
+	post /create (CreateAvatarRequest) returns (AvatarResponse)
+
+	@doc "获取我的分身"
+	@handler getMyAvatar
+	get /my returns (AvatarResponse)
+
+	@doc "获取分身详情"
+	@handler getAvatar
+	get /:id (GetAvatarRequest) returns (AvatarResponse)
+
+	@doc "更新分身资料"
+	@handler updateAvatar
+	patch /:id (UpdateAvatarRequest) returns (AvatarResponse)
+
+	@doc "获取分身头像上传凭证"
+	@handler getAvatarUploadToken
+	get /avatar-token returns (AvatarUploadTokenResponse)
+
+	@doc "完成分身头像上传"
+	@handler completeAvatarUpload
+	post /avatar-complete (AvatarUploadCompleteRequest) returns (AvatarUploadCompleteResponse)
+
+	@doc "更新分身性格"
+	@handler updatePersonality
+	put /:id/personality (UpdatePersonalityRequest) returns (AvatarResponse)
+}
