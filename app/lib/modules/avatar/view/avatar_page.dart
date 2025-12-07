@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import '../controller/avatar_controller.dart';
 import '../../../core/utils/image_picker_service.dart';
 import '../service/avatar_oss_upload_service.dart';
+import '../widget/personality_radar_chart.dart';
 
 class AvatarPage extends ConsumerStatefulWidget {
   const AvatarPage({super.key});
@@ -458,14 +459,15 @@ class _AvatarPageState extends ConsumerState<AvatarPage> {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          Container(
+          SizedBox(
             height: 200,
-            decoration: BoxDecoration(
-              color: Colors.purple.shade50,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Center(
-              child: Text('6维雷达图'),
+            child: PersonalityRadarChart(
+              warmth: avatar.warmth,
+              adventurous: avatar.adventurous,
+              social: avatar.social,
+              creative: avatar.creative,
+              calm: avatar.calm,
+              energetic: avatar.energetic,
             ),
           ),
           const SizedBox(height: 16),
