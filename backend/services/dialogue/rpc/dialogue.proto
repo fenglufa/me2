@@ -1,0 +1,122 @@
+syntax = "proto3";
+
+package dialogue;
+option go_package = "./dialogue";
+
+// 对话服务
+service Dialogue {
+  // 创建会话
+  rpc CreateSession(CreateSessionRequest) returns (CreateSessionResponse);
+
+  // 获取会话列表
+  rpc GetSessions(GetSessionsRequest) returns (GetSessionsResponse);
+
+  // 获取会话详情
+  rpc GetSessionInfo(GetSessionInfoRequest) returns (GetSessionInfoResponse);
+
+  // 获取对话历史
+  rpc GetMessages(GetMessagesRequest) returns (GetMessagesResponse);
+
+  // 流式对话
+  rpc ChatStream(ChatStreamRequest) returns (stream ChatStreamResponse);
+
+  // 删除会话
+  rpc DeleteSession(DeleteSessionRequest) returns (DeleteSessionResponse);
+}
+
+// 创建会话请求
+message CreateSessionRequest {
+  int64 user_id = 1;
+  int64 avatar_id = 2;
+  string title = 3;  // 可选标题
+}
+
+// 创建会话响应
+message CreateSessionResponse {
+  int64 session_id = 1;
+}
+
+// 获取会话列表请求
+message GetSessionsRequest {
+  int64 user_id = 1;
+  int64 avatar_id = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+// 获取会话列表响应
+message GetSessionsResponse {
+  repeated SessionInfo sessions = 1;
+  int64 total = 2;
+}
+
+// 会话信息
+message SessionInfo {
+  int64 id = 1;
+  int64 user_id = 2;
+  int64 avatar_id = 3;
+  string title = 4;
+  string last_message = 5;  // 最后一条消息
+  int64 created_at = 6;
+  int64 updated_at = 7;
+}
+
+// 获取会话详情请求
+message GetSessionInfoRequest {
+  int64 session_id = 1;
+  int64 user_id = 2;
+}
+
+// 获取会话详情响应
+message GetSessionInfoResponse {
+  SessionInfo session = 1;
+}
+
+// 获取对话历史请求
+message GetMessagesRequest {
+  int64 session_id = 1;
+  int64 user_id = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+// 获取对话历史响应
+message GetMessagesResponse {
+  repeated Message messages = 1;
+  int64 total = 2;
+}
+
+// 消息
+message Message {
+  int64 id = 1;
+  int64 session_id = 2;
+  string role = 3;  // user/assistant
+  string content = 4;
+  int64 created_at = 5;
+}
+
+// 流式对话请求
+message ChatStreamRequest {
+  int64 session_id = 1;
+  string message = 2;
+  int64 user_id = 3;
+  int64 avatar_id = 4;
+}
+
+// 流式对话响应
+message ChatStreamResponse {
+  string content = 1;
+  bool done = 2;
+  int64 message_id = 3;  // 最后一条消息返回
+}
+
+// 删除会话请求
+message DeleteSessionRequest {
+  int64 session_id = 1;
+  int64 user_id = 2;
+}
+
+// 删除会话响应
+message DeleteSessionResponse {
+  bool success = 1;
+}
