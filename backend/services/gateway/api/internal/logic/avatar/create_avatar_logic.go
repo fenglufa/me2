@@ -27,9 +27,13 @@ func (l *CreateAvatarLogic) CreateAvatar(req *types.CreateAvatarRequest) (resp *
 	userID := l.ctx.Value("user_id").(int64)
 
 	rpcResp, err := l.svcCtx.AvatarRpc.CreateAvatar(l.ctx, &avatar.CreateAvatarRequest{
-		UserId:    userID,
-		Nickname:  req.Name,
-		AvatarUrl: req.AvatarUrl,
+		UserId:        userID,
+		Nickname:      req.Name,
+		AvatarUrl:     req.AvatarUrl,
+		Gender:        int32(req.Gender),
+		BirthDate:     req.BirthDate,
+		Occupation:    req.Occupation,
+		MaritalStatus: int32(req.MaritalStatus),
 	})
 	if err != nil {
 		return nil, err
@@ -46,5 +50,6 @@ func (l *CreateAvatarLogic) CreateAvatar(req *types.CreateAvatarRequest) (resp *
 		Creative:    float64(rpcResp.Personality.Creative),
 		Calm:        float64(rpcResp.Personality.Calm),
 		Energetic:   float64(rpcResp.Personality.Energetic),
+		CreatedAt:   0, // 新创建的分身，使用当前时间戳
 	}, nil
 }

@@ -3,6 +3,7 @@ import '../modules/auth/view/login_page.dart';
 import '../modules/main/view/main_page.dart';
 import '../modules/settings/view/settings_page.dart';
 import '../modules/profile/view/edit_profile_page.dart';
+import '../modules/avatar/view/edit_avatar_page.dart';
 import '../core/storage/token_storage.dart';
 
 final appRouter = GoRouter(
@@ -36,6 +37,13 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/edit-profile',
       builder: (context, state) => const EditProfilePage(),
+    ),
+    GoRoute(
+      path: '/edit-avatar',
+      builder: (context, state) {
+        final avatarId = state.extra as int;
+        return EditAvatarPage(avatarId: avatarId);
+      },
     ),
   ],
 );

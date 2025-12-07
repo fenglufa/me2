@@ -72,7 +72,8 @@ type AvatarTokenResponse struct {
 }
 
 type AvatarUploadCompleteRequest struct {
-	Key string `json:"key"`
+	Key   string `json:"key"`
+	Token string `json:"token"`
 }
 
 type AvatarUploadCompleteResponse struct {
@@ -83,11 +84,19 @@ type AvatarUploadTokenResponse struct {
 	Token     string `json:"token"`
 	UploadUrl string `json:"upload_url"`
 	Key       string `json:"key"`
+	Accessid  string `json:"accessid"`
+	Policy    string `json:"policy"`
+	Signature string `json:"signature"`
+	Dir       string `json:"dir"`
 }
 
 type CreateAvatarRequest struct {
-	Name      string `json:"name"`
-	AvatarUrl string `json:"avatar_url"`
+	Name          string `json:"name"`
+	AvatarUrl     string `json:"avatar_url,optional"`
+	Gender        int64  `json:"gender"`         // 性别 1:男 2:女 3:其他
+	BirthDate     string `json:"birth_date"`     // 出生日期 YYYY-MM-DD
+	Occupation    string `json:"occupation"`     // 职业
+	MaritalStatus int64  `json:"marital_status"` // 婚姻状态 1:单身 2:恋爱中 3:已婚 4:其他
 }
 
 type CreateUserDiaryRequest struct {

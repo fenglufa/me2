@@ -3,8 +3,12 @@ syntax = "v1"
 type (
 	// 创建分身请求
 	CreateAvatarRequest {
-		Name      string `json:"name"`
-		AvatarUrl string `json:"avatar_url"`
+		Name          string `json:"name"`
+		AvatarUrl     string `json:"avatar_url,optional"`
+		Gender        int64  `json:"gender"`           // 性别 1:男 2:女 3:其他
+		BirthDate     string `json:"birth_date"`       // 出生日期 YYYY-MM-DD
+		Occupation    string `json:"occupation"`       // 职业
+		MaritalStatus int64  `json:"marital_status"`   // 婚姻状态 1:单身 2:恋爱中 3:已婚 4:其他
 	}
 
 	// 获取分身请求
@@ -39,11 +43,16 @@ type (
 		Token     string `json:"token"`
 		UploadUrl string `json:"upload_url"`
 		Key       string `json:"key"`
+		Accessid  string `json:"accessid"`
+		Policy    string `json:"policy"`
+		Signature string `json:"signature"`
+		Dir       string `json:"dir"`
 	}
 
 	// 完成分身头像上传请求
 	AvatarUploadCompleteRequest {
-		Key string `json:"key"`
+		Key   string `json:"key"`
+		Token string `json:"token"`
 	}
 
 	// 完成分身头像上传响应

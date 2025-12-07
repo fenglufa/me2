@@ -50,5 +50,9 @@ func (l *GetAvatarUploadTokenLogic) GetAvatarUploadToken() (resp *types.AvatarUp
 		Token:     rpcResp.CompleteToken,
 		UploadUrl: rpcResp.Host,
 		Key:       rpcResp.Key,
+		Accessid:  rpcResp.AccessKeyId,
+		Policy:    rpcResp.Policy,
+		Signature: rpcResp.Signature,
+		Dir:       "", // RPC 响应中没有单独的 dir 字段，可以从 Key 中提取
 	}, nil
 }

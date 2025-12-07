@@ -41,7 +41,7 @@ func (l *CompleteAvatarUploadLogic) CompleteAvatarUpload(req *types.AvatarUpload
 	rpcResp, err := l.svcCtx.AvatarRpc.CompleteAvatarUpload(l.ctx, &avatar.CompleteAvatarUploadRequest{
 		AvatarId:      myAvatarResp.Avatar.AvatarId,
 		Key:           req.Key,
-		CompleteToken: req.Key,
+		CompleteToken: req.Token,
 	})
 	if err != nil {
 		return nil, err
