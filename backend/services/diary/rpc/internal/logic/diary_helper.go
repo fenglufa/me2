@@ -88,6 +88,7 @@ func convertToDiaryInfo(d *model.Diaries) *diary.DiaryInfo {
 
 	return &diary.DiaryInfo{
 		Id:           d.Id,
+		UserId:       d.UserId,
 		AvatarId:     d.AvatarId,
 		Type:         d.Type,
 		Date:         d.Date.Format("2006-01-02"),

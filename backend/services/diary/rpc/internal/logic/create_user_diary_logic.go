@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/me2/ai/rpc/ai_client"
+	"github.com/me2/avatar/rpc/avatar_client"
 	"github.com/me2/diary/rpc/diary"
 	"github.com/me2/diary/rpc/internal/model"
 	"github.com/me2/diary/rpc/internal/svc"
@@ -31,26 +32,25 @@ func NewCreateUserDiaryLogic(ctx context.Context, svcCtx *svc.ServiceContext) *C
 
 // 创建用户日记
 func (l *CreateUserDiaryLogic) CreateUserDiary(in *diary.CreateUserDiaryRequest) (*diary.CreateUserDiaryResponse, error) {
-	// 1. 检查今天是否已有用户日记
-	today := time.Now().Format("2006-01-02")
-	existingDiaries, err := l.svcCtx.DiaryModel.FindByAvatarAndType(l.ctx, in.AvatarId, "user", 1, 1, today, today)
+	// 0. 获取用户的分身ID（用于 AI 调用）
+	avatarResp, err := l.svcCtx.AvatarRpc.GetMyAvatar(l.ctx, &avatar_client.GetMyAvatarRequest{
+		UserId: in.UserId,
+	})
 	if err != nil {
-		l.Errorf("查询现有日记失败: %v", err)
+		l.Errorf("获取用户分身失败: %v", err)
+		return nil, fmt.Errorf("获取用户分身失败")
 	}
+	avatarId := avatarResp.Avatar.AvatarId
 
-	// 如果今天已经有日记，返回错误提示
-	if len(existingDiaries) > 0 {
-		return nil, fmt.Errorf("今天已经写过日记了，一天只能写一篇用户日记")
-	}
-
-	// 2. 保存用户日记
+	// 1. 保存用户日记
 	isImportant := int64(0)
 	if in.IsImportant {
 		isImportant = 1
 	}
 
 	diaryModel := &model.Diaries{
-		AvatarId:    in.AvatarId,
+		UserId:      in.UserId,
+		AvatarId:    0, // 用户日记时 avatar_id 为 0
 		Type:        "user",
 		Date:        time.Now(),
 		Title:       in.Title,
@@ -81,7 +81,7 @@ func (l *CreateUserDiaryLogic) CreateUserDiary(in *diary.CreateUserDiaryRequest)
 		Variables: map[string]string{
 			"text": in.Content,
 		},
-		AvatarId: in.AvatarId,
+		AvatarId: avatarId,
 	})
 	if err != nil {
 		l.Errorf("情绪分析失败: %v", err)
@@ -100,7 +100,7 @@ func (l *CreateUserDiaryLogic) CreateUserDiary(in *diary.CreateUserDiaryRequest)
 			"emotion":       fmt.Sprintf("情绪分数: %d", emotionScore),
 			"personality":   "温暖、善良、乐观",  // 可以从 Avatar 服务获取
 		},
-		AvatarId: in.AvatarId,
+		AvatarId: avatarId,
 	})
 	if err != nil {
 		l.Errorf("生成分身回应失败: %v", err)
@@ -114,7 +114,8 @@ func (l *CreateUserDiaryLogic) CreateUserDiary(in *diary.CreateUserDiaryRequest)
 	// 4. 更新日记的回应和情绪分数
 	err = l.svcCtx.DiaryModel.Update(context.Background(), &model.Diaries{
 		Id:           diaryId,
-		AvatarId:     in.AvatarId,
+		UserId:       in.UserId,
+		AvatarId:     0, // 用户日记时 avatar_id 为 0
 		Type:         "user",
 		Date:         time.Now(),
 		Title:        in.Title,
@@ -128,7 +129,7 @@ func (l *CreateUserDiaryLogic) CreateUserDiary(in *diary.CreateUserDiaryRequest)
 		l.Errorf("更新日记失败: %v", err)
 	}
 
-	l.Infof("成功创建用户日记 (diary_id=%d, avatar_id=%d)", diaryId, in.AvatarId)
+	l.Infof("成功创建用户日记 (diary_id=%d, user_id=%d)", diaryId, in.UserId)
 
 	return &diary.CreateUserDiaryResponse{
 		DiaryId:      diaryId,

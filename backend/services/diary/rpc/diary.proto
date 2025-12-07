@@ -27,17 +27,18 @@ service Diary {
 // 日记信息
 message DiaryInfo {
   int64 id = 1;
-  int64 avatar_id = 2;
-  string type = 3;              // avatar/user
-  string date = 4;              // YYYY-MM-DD
-  string title = 5;
-  string content = 6;
-  string mood = 7;              // happy, sad, excited, calm, etc.
-  repeated string tags = 8;
-  string reply_content = 9;     // 分身回应（仅 user 类型）
-  int32 emotion_score = 10;     // -100 到 100（仅 user 类型）
-  bool is_important = 11;
-  string created_at = 12;
+  int64 user_id = 2;            // 用户ID（所有日记都有）
+  int64 avatar_id = 3;          // 分身ID（分身日记时有值，用户日记时为0）
+  string type = 4;              // avatar/user
+  string date = 5;              // YYYY-MM-DD
+  string title = 6;
+  string content = 7;
+  string mood = 8;              // happy, sad, excited, calm, etc.
+  repeated string tags = 9;
+  string reply_content = 10;    // 分身回应（仅 user 类型）
+  int32 emotion_score = 11;     // -100 到 100（仅 user 类型）
+  bool is_important = 12;
+  string created_at = 13;
 }
 
 // 生成分身日记
@@ -70,7 +71,7 @@ message GetAvatarDiaryListResponse {
 
 // 创建用户日记
 message CreateUserDiaryRequest {
-  int64 avatar_id = 1;
+  int64 user_id = 1;            // 用户ID
   string title = 2;
   string content = 3;
   repeated string tags = 4;
@@ -85,7 +86,7 @@ message CreateUserDiaryResponse {
 
 // 获取用户日记列表
 message GetUserDiaryListRequest {
-  int64 avatar_id = 1;
+  int64 user_id = 1;            // 用户ID
   int32 page = 2;
   int32 page_size = 3;
   string start_date = 4;        // 可选
@@ -99,7 +100,7 @@ message GetUserDiaryListResponse {
 
 // 获取日记统计
 message GetDiaryStatsRequest {
-  int64 avatar_id = 1;
+  int64 user_id = 1;            // 用户ID
 }
 
 message GetDiaryStatsResponse {

@@ -3,6 +3,7 @@ package diary
 import (
 	"context"
 
+	"github.com/me2/avatar/rpc/avatar"
 	"github.com/me2/diary/rpc/diary"
 	"github.com/me2/gateway/api/internal/svc"
 	"github.com/me2/gateway/api/internal/types"
@@ -26,8 +27,16 @@ func NewGetAvatarDiariesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 func (l *GetAvatarDiariesLogic) GetAvatarDiaries(req *types.DiaryListRequest) (resp *types.DiaryListResponse, err error) {
 	userID := l.ctx.Value("user_id").(int64)
 
+	// 获取用户的分身信息
+	avatarResp, err := l.svcCtx.AvatarRpc.GetMyAvatar(l.ctx, &avatar.GetMyAvatarRequest{
+		UserId: userID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	rpcResp, err := l.svcCtx.DiaryRpc.GetAvatarDiaryList(l.ctx, &diary.GetAvatarDiaryListRequest{
-		AvatarId: userID,
+		AvatarId: avatarResp.Avatar.AvatarId,
 		Page:     int32(req.Page),
 		PageSize: int32(req.PageSize),
 	})

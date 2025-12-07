@@ -27,7 +27,7 @@ func (l *GetUserDiariesLogic) GetUserDiaries(req *types.DiaryListRequest) (resp 
 	userID := l.ctx.Value("user_id").(int64)
 
 	rpcResp, err := l.svcCtx.DiaryRpc.GetUserDiaryList(l.ctx, &diary.GetUserDiaryListRequest{
-		AvatarId: userID,
+		UserId:   userID,
 		Page:     int32(req.Page),
 		PageSize: int32(req.PageSize),
 	})

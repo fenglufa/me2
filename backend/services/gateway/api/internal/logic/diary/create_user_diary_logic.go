@@ -27,8 +27,8 @@ func (l *CreateUserDiaryLogic) CreateUserDiary(req *types.CreateUserDiaryRequest
 	userID := l.ctx.Value("user_id").(int64)
 
 	rpcResp, err := l.svcCtx.DiaryRpc.CreateUserDiary(l.ctx, &diary.CreateUserDiaryRequest{
-		AvatarId: userID,
-		Content:  req.Content,
+		UserId:  userID,
+		Content: req.Content,
 	})
 	if err != nil {
 		return nil, err

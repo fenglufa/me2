@@ -39,7 +39,8 @@ type (
 
 	Diaries struct {
 		Id           int64          `db:"id"`
-		AvatarId     int64          `db:"avatar_id"`     // 分身ID
+		UserId       int64          `db:"user_id"`       // 用户ID
+		AvatarId     int64          `db:"avatar_id"`     // 分身ID（分身日记时有值，用户日记时为0）
 		Type         string         `db:"type"`          // 日记类型
 		Date         time.Time      `db:"date"`          // 日记日期
 		Title        string         `db:"title"`         // 标题
@@ -95,14 +96,14 @@ func (m *defaultDiariesModel) FindOneByAvatarIdTypeDate(ctx context.Context, ava
 }
 
 func (m *defaultDiariesModel) Insert(ctx context.Context, data *Diaries) (sql.Result, error) {
-	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", m.table, diariesRowsExpectAutoSet)
-	ret, err := m.conn.ExecCtx(ctx, query, data.AvatarId, data.Type, data.Date, data.Title, data.Content, data.Mood, data.Tags, data.ReplyContent, data.EmotionScore, data.IsImportant)
+	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", m.table, diariesRowsExpectAutoSet)
+	ret, err := m.conn.ExecCtx(ctx, query, data.UserId, data.AvatarId, data.Type, data.Date, data.Title, data.Content, data.Mood, data.Tags, data.ReplyContent, data.EmotionScore, data.IsImportant)
 	return ret, err
 }
 
 func (m *defaultDiariesModel) Update(ctx context.Context, newData *Diaries) error {
 	query := fmt.Sprintf("update %s set %s where `id` = ?", m.table, diariesRowsWithPlaceHolder)
-	_, err := m.conn.ExecCtx(ctx, query, newData.AvatarId, newData.Type, newData.Date, newData.Title, newData.Content, newData.Mood, newData.Tags, newData.ReplyContent, newData.EmotionScore, newData.IsImportant, newData.Id)
+	_, err := m.conn.ExecCtx(ctx, query, newData.UserId, newData.AvatarId, newData.Type, newData.Date, newData.Title, newData.Content, newData.Mood, newData.Tags, newData.ReplyContent, newData.EmotionScore, newData.IsImportant, newData.Id)
 	return err
 }
 

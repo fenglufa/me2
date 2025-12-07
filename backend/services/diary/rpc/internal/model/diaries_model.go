@@ -16,7 +16,9 @@ type (
 		withSession(session sqlx.Session) DiariesModel
 		FindByAvatarAndType(ctx context.Context, avatarId int64, tp string, page, pageSize int32, startDate, endDate string) ([]*Diaries, error)
 		CountByAvatarAndType(ctx context.Context, avatarId int64, tp string, startDate, endDate string) (int64, error)
-		GetDiaryStats(ctx context.Context, avatarId int64) (map[string]interface{}, error)
+		FindByUserAndType(ctx context.Context, userId int64, tp string, page, pageSize int32, startDate, endDate string) ([]*Diaries, error)
+		CountByUserAndType(ctx context.Context, userId int64, tp string, startDate, endDate string) (int64, error)
+		GetDiaryStats(ctx context.Context, userId int64) (map[string]interface{}, error)
 	}
 
 	customDiariesModel struct {

@@ -3,7 +3,7 @@
 # Action Service 测试脚本
 # 测试分身 ID: 4947066875
 
-AVATAR_ID=4947066875
+AVATAR_ID=248658343
 
 echo "=========================================="
 echo "Action Service 测试脚本"

@@ -56,22 +56,41 @@ diary/
 ```sql
 CREATE TABLE `diaries` (
     `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
-    `avatar_id` BIGINT NOT NULL,
-    `type` ENUM('avatar', 'user') NOT NULL,
+    `user_id` BIGINT NOT NULL COMMENT '用户ID（所有日记都有）',
+    `avatar_id` BIGINT NOT NULL COMMENT '分身ID（分身日记时有值，用户日记时为0）',
+    `type` ENUM('avatar', 'user') NOT NULL COMMENT '日记类型：avatar-分身日记, user-用户日记',
     `date` DATE NOT NULL,
     `title` VARCHAR(200) DEFAULT '',
     `content` TEXT NOT NULL,
     `mood` VARCHAR(50) DEFAULT '',
     `tags` VARCHAR(500) DEFAULT '',
-    `reply_content` TEXT,
-    `emotion_score` INT DEFAULT 0,
+    `reply_content` TEXT COMMENT '分身回应（仅user类型有值）',
+    `emotion_score` INT DEFAULT 0 COMMENT '情绪分数-100到100（仅user类型有值）',
     `is_important` TINYINT DEFAULT 0,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_user_id` (`user_id`),
     INDEX `idx_avatar_date` (`avatar_id`, `date`),
+    INDEX `idx_user_type` (`user_id`, `type`),
     INDEX `idx_avatar_type` (`avatar_id`, `type`),
     UNIQUE KEY `uk_avatar_type_date` (`avatar_id`, `type`, `date`)
 );
 ```
+
+#### 字段说明
+- `user_id`: 用户ID，所有日记都关联到用户
+- `avatar_id`: 分身ID
+  - 分身日记（type='avatar'）时：存储分身ID
+  - 用户日记（type='user'）时：设置为0
+- `type`: 日记类型
+  - `avatar`: 分身写的日记（由AI生成）
+  - `user`: 用户写的日记
+- `reply_content`: 分身对用户日记的回应（仅user类型）
+- `emotion_score`: 情绪分数（仅user类型）
+
+#### 查询策略
+- **查询用户日记**：使用 `WHERE user_id = ? AND type = 'user'`
+- **查询分身日记**：使用 `WHERE avatar_id = ? AND type = 'avatar'`
+- **统计用户所有日记**：使用 `WHERE user_id = ?`
 
 ## API 接口
 
@@ -103,7 +122,7 @@ message GenerateAvatarDiaryResponse {
 **请求:**
 ```protobuf
 message CreateUserDiaryRequest {
-  int64 avatar_id = 1;
+  int64 user_id = 1;            // 用户ID
   string title = 2;
   string content = 3;
   repeated string tags = 4;
@@ -135,10 +154,28 @@ message GetAvatarDiaryListRequest {
 ```
 
 ### 4. GetUserDiaryList
-获取用户日记列表（同上）
+获取用户日记列表
+
+**请求:**
+```protobuf
+message GetUserDiaryListRequest {
+  int64 user_id = 1;        // 用户ID
+  int32 page = 2;
+  int32 page_size = 3;
+  string start_date = 4;    // 可选
+  string end_date = 5;      // 可选
+}
+```
 
 ### 5. GetDiaryStats
 获取日记统计
+
+**请求:**
+```protobuf
+message GetDiaryStatsRequest {
+  int64 user_id = 1;        // 用户ID
+}
+```
 
 **响应:**
 ```protobuf
@@ -150,6 +187,25 @@ message GetDiaryStatsResponse {
   int64 total_words = 5;
   string first_diary_date = 6;
   string last_diary_date = 7;
+}
+```
+
+### DiaryInfo 消息
+```protobuf
+message DiaryInfo {
+  int64 id = 1;
+  int64 user_id = 2;            // 用户ID（所有日记都有）
+  int64 avatar_id = 3;          // 分身ID（分身日记时有值，用户日记时为0）
+  string type = 4;              // avatar/user
+  string date = 5;              // YYYY-MM-DD
+  string title = 6;
+  string content = 7;
+  string mood = 8;              // happy, sad, excited, calm, etc.
+  repeated string tags = 9;
+  string reply_content = 10;    // 分身回应（仅 user 类型）
+  int32 emotion_score = 11;     // -100 到 100（仅 user 类型）
+  bool is_important = 12;
+  string created_at = 13;
 }
 ```
 

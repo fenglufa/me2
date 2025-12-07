@@ -8,18 +8,22 @@ part of 'diary.dart';
 
 Diary _$DiaryFromJson(Map<String, dynamic> json) => Diary(
       id: (json['id'] as num).toInt(),
-      avatarId: (json['avatar_id'] as num).toInt(),
+      userId: (json['user_id'] as num?)?.toInt(),
+      avatarId: (json['avatar_id'] as num?)?.toInt(),
       type: json['type'] as String,
       date: json['date'] as String,
       title: json['title'] as String,
       content: json['content'] as String,
       mood: json['mood'] as String,
       replyContent: json['reply_content'] as String?,
-      createdAt: (json['created_at'] as num).toInt(),
+      emotionScore: (json['emotion_score'] as num?)?.toInt(),
+      isImportant: json['is_important'] as bool?,
+      createdAt: (json['created_at'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$DiaryToJson(Diary instance) => <String, dynamic>{
       'id': instance.id,
+      'user_id': instance.userId,
       'avatar_id': instance.avatarId,
       'type': instance.type,
       'date': instance.date,
@@ -27,6 +31,8 @@ Map<String, dynamic> _$DiaryToJson(Diary instance) => <String, dynamic>{
       'content': instance.content,
       'mood': instance.mood,
       'reply_content': instance.replyContent,
+      'emotion_score': instance.emotionScore,
+      'is_important': instance.isImportant,
       'created_at': instance.createdAt,
     };
 

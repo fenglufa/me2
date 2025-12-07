@@ -25,7 +25,7 @@ func NewGetDiaryStatsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Get
 
 // 获取日记统计
 func (l *GetDiaryStatsLogic) GetDiaryStats(in *diary.GetDiaryStatsRequest) (*diary.GetDiaryStatsResponse, error) {
-	stats, err := l.svcCtx.DiaryModel.GetDiaryStats(l.ctx, in.AvatarId)
+	stats, err := l.svcCtx.DiaryModel.GetDiaryStats(l.ctx, in.UserId)
 	if err != nil {
 		l.Errorf("获取日记统计失败: %v", err)
 		return nil, err

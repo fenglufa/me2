@@ -93,6 +93,7 @@ func (l *GenerateAvatarDiaryLogic) GenerateAvatarDiary(in *diary.GenerateAvatarD
 	// 4. 保存日记
 	diaryDate, _ := time.Parse("2006-01-02", date)
 	diaryModel := &model.Diaries{
+		UserId:      0,            // TODO: 需要从 Avatar RPC 获取 user_id
 		AvatarId:    in.AvatarId,
 		Type:        "avatar",
 		Date:        diaryDate,

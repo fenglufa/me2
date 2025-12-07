@@ -5,8 +5,10 @@ part 'diary.g.dart';
 @JsonSerializable()
 class Diary {
   final int id;
+  @JsonKey(name: 'user_id')
+  final int? userId;
   @JsonKey(name: 'avatar_id')
-  final int avatarId;
+  final int? avatarId;
   final String type;
   final String date;
   final String title;
@@ -14,19 +16,26 @@ class Diary {
   final String mood;
   @JsonKey(name: 'reply_content')
   final String? replyContent;
+  @JsonKey(name: 'emotion_score')
+  final int? emotionScore;
+  @JsonKey(name: 'is_important')
+  final bool? isImportant;
   @JsonKey(name: 'created_at')
-  final int createdAt;
+  final int? createdAt;
 
   Diary({
     required this.id,
-    required this.avatarId,
+    this.userId,
+    this.avatarId,
     required this.type,
     required this.date,
     required this.title,
     required this.content,
     required this.mood,
     this.replyContent,
-    required this.createdAt,
+    this.emotionScore,
+    this.isImportant,
+    this.createdAt,
   });
 
   factory Diary.fromJson(Map<String, dynamic> json) => _$DiaryFromJson(json);

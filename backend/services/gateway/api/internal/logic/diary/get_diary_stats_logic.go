@@ -28,7 +28,7 @@ func (l *GetDiaryStatsLogic) GetDiaryStats() (resp *types.DiaryStatsResponse, er
 	userID := l.ctx.Value("user_id").(int64)
 
 	rpcResp, err := l.svcCtx.DiaryRpc.GetDiaryStats(l.ctx, &diary.GetDiaryStatsRequest{
-		AvatarId: userID,
+		UserId: userID,
 	})
 	if err != nil {
 		return nil, err
