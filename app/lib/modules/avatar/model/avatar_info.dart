@@ -43,12 +43,12 @@ class AvatarInfo {
       birthDate: json['birth_date'] ?? '',
       occupation: json['occupation'] ?? '',
       maritalStatus: json['marital_status'] ?? 1,
-      warmth: (json['warmth'] ?? 0.0).toDouble(),
-      adventurous: (json['adventurous'] ?? 0.0).toDouble(),
-      social: (json['social'] ?? 0.0).toDouble(),
-      creative: (json['creative'] ?? 0.0).toDouble(),
-      calm: (json['calm'] ?? 0.0).toDouble(),
-      energetic: (json['energetic'] ?? 0.0).toDouble(),
+      warmth: (json['warmth'] ?? 0.0).toDouble() / 100,
+      adventurous: (json['adventurous'] ?? 0.0).toDouble() / 100,
+      social: (json['social'] ?? 0.0).toDouble() / 100,
+      creative: (json['creative'] ?? 0.0).toDouble() / 100,
+      calm: (json['calm'] ?? 0.0).toDouble() / 100,
+      energetic: (json['energetic'] ?? 0.0).toDouble() / 100,
       createdAt: json['created_at'] ?? 0,
     );
   }

@@ -454,7 +454,7 @@ class _AvatarPageState extends ConsumerState<AvatarPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            '性格面板',
+            '人格面板',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
