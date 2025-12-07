@@ -2,6 +2,7 @@ package event
 
 import (
 	"context"
+	"time"
 
 	"github.com/me2/event/rpc/event"
 	"github.com/me2/gateway/api/internal/svc"
@@ -26,8 +27,8 @@ func NewGetEventTimelineLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 func (l *GetEventTimelineLogic) GetEventTimeline(req *types.EventListRequest) (resp *types.EventListResponse, err error) {
 	userID := l.ctx.Value("user_id").(int64)
 
-	rpcResp, err := l.svcCtx.EventRpc.GetEventTimeline(l.ctx, &event.GetEventTimelineRequest{
-		AvatarId: userID,
+	rpcResp, err := l.svcCtx.EventRpc.GetUserEventTimeline(l.ctx, &event.GetUserEventTimelineRequest{
+		UserId:   userID,
 		Page:     int32(req.Page),
 		PageSize: int32(req.PageSize),
 	})
@@ -37,12 +38,21 @@ func (l *GetEventTimelineLogic) GetEventTimeline(req *types.EventListRequest) (r
 
 	list := make([]types.EventResponse, 0, len(rpcResp.Events))
 	for _, e := range rpcResp.Events {
+		var occurredAt int64
+		if t, err := time.Parse("2006-01-02 15:04:05", e.OccurredAt); err == nil {
+			occurredAt = t.Unix()
+		}
+
 		list = append(list, types.EventResponse{
-			Id:        e.EventId,
-			EventType: e.EventType,
-			EventText: e.EventText,
-			ImageUrl:  e.ImageUrl,
-			SceneName: e.SceneName,
+			Id:         e.EventId,
+			AvatarId:   0,
+			EventType:  e.EventType,
+			EventTitle: e.EventTitle,
+			EventText:  e.EventText,
+			ImageUrl:   e.ImageUrl,
+			SceneId:    0,
+			SceneName:  e.SceneName,
+			OccurredAt: occurredAt,
 		})
 	}
 

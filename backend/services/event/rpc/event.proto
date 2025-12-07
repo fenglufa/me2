@@ -8,8 +8,11 @@ service Event {
     // 生成事件
     rpc GenerateEvent(GenerateEventRequest) returns (GenerateEventResponse);
 
-    // 获取事件时间线
+    // 获取事件时间线（按分身ID）
     rpc GetEventTimeline(GetEventTimelineRequest) returns (GetEventTimelineResponse);
+
+    // 获取事件时间线（按用户ID）
+    rpc GetUserEventTimeline(GetUserEventTimelineRequest) returns (GetEventTimelineResponse);
 
     // 获取事件详情
     rpc GetEventDetail(GetEventDetailRequest) returns (GetEventDetailResponse);
@@ -39,6 +42,12 @@ message GenerateEventResponse {
 
 message GetEventTimelineRequest {
     int64 avatar_id = 1;         // 分身ID
+    int32 page = 2;              // 页码（从1开始）
+    int32 page_size = 3;         // 每页数量
+}
+
+message GetUserEventTimelineRequest {
+    int64 user_id = 1;           // 用户ID
     int32 page = 2;              // 页码（从1开始）
     int32 page_size = 3;         // 每页数量
 }

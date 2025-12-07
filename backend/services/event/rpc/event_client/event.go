@@ -14,22 +14,25 @@ import (
 )
 
 type (
-	EventInfo                = event.EventInfo
-	GenerateEventRequest     = event.GenerateEventRequest
-	GenerateEventResponse    = event.GenerateEventResponse
-	GetEventDetailRequest    = event.GetEventDetailRequest
-	GetEventDetailResponse   = event.GetEventDetailResponse
-	GetEventTimelineRequest  = event.GetEventTimelineRequest
-	GetEventTimelineResponse = event.GetEventTimelineResponse
-	GetTemplatesRequest      = event.GetTemplatesRequest
-	GetTemplatesResponse     = event.GetTemplatesResponse
-	TemplateInfo             = event.TemplateInfo
+	EventInfo                   = event.EventInfo
+	GenerateEventRequest        = event.GenerateEventRequest
+	GenerateEventResponse       = event.GenerateEventResponse
+	GetEventDetailRequest       = event.GetEventDetailRequest
+	GetEventDetailResponse      = event.GetEventDetailResponse
+	GetEventTimelineRequest     = event.GetEventTimelineRequest
+	GetEventTimelineResponse    = event.GetEventTimelineResponse
+	GetTemplatesRequest         = event.GetTemplatesRequest
+	GetTemplatesResponse        = event.GetTemplatesResponse
+	GetUserEventTimelineRequest = event.GetUserEventTimelineRequest
+	TemplateInfo                = event.TemplateInfo
 
 	Event interface {
 		// 生成事件
 		GenerateEvent(ctx context.Context, in *GenerateEventRequest, opts ...grpc.CallOption) (*GenerateEventResponse, error)
-		// 获取事件时间线
+		// 获取事件时间线（按分身ID）
 		GetEventTimeline(ctx context.Context, in *GetEventTimelineRequest, opts ...grpc.CallOption) (*GetEventTimelineResponse, error)
+		// 获取事件时间线（按用户ID）
+		GetUserEventTimeline(ctx context.Context, in *GetUserEventTimelineRequest, opts ...grpc.CallOption) (*GetEventTimelineResponse, error)
 		// 获取事件详情
 		GetEventDetail(ctx context.Context, in *GetEventDetailRequest, opts ...grpc.CallOption) (*GetEventDetailResponse, error)
 		// 获取模板列表（后续可用于管理后台）
@@ -53,10 +56,16 @@ func (m *defaultEvent) GenerateEvent(ctx context.Context, in *GenerateEventReque
 	return client.GenerateEvent(ctx, in, opts...)
 }
 
-// 获取事件时间线
+// 获取事件时间线（按分身ID）
 func (m *defaultEvent) GetEventTimeline(ctx context.Context, in *GetEventTimelineRequest, opts ...grpc.CallOption) (*GetEventTimelineResponse, error) {
 	client := event.NewEventClient(m.cli.Conn())
 	return client.GetEventTimeline(ctx, in, opts...)
+}
+
+// 获取事件时间线（按用户ID）
+func (m *defaultEvent) GetUserEventTimeline(ctx context.Context, in *GetUserEventTimelineRequest, opts ...grpc.CallOption) (*GetEventTimelineResponse, error) {
+	client := event.NewEventClient(m.cli.Conn())
+	return client.GetUserEventTimeline(ctx, in, opts...)
 }
 
 // 获取事件详情

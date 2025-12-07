@@ -114,6 +114,7 @@ func (l *GenerateEventLogic) GenerateEvent(in *event.GenerateEventRequest) (*eve
 	// 7. 保存事件历史
 	eventHistory := &model.EventHistory{
 		AvatarId:    in.AvatarId,
+		UserId:      avatarInfo.Avatar.UserId,
 		TemplateId:  selectedTemplate.Id,
 		EventType:   in.ActionType,
 		EventTitle:  eventTitle,

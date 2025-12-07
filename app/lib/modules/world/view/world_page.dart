@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../controllers/world_controller.dart';
 import '../models/world_models.dart';
+import '../../event/models/event_models.dart';
+import '../../event/services/event_service.dart';
 
 class WorldPage extends StatefulWidget {
   const WorldPage({super.key});
@@ -11,12 +13,29 @@ class WorldPage extends StatefulWidget {
 
 class _WorldPageState extends State<WorldPage> {
   final _controller = WorldController();
+  final _eventService = EventService();
+  List<Event> _recentEvents = [];
+  bool _loadingEvents = false;
 
   @override
   void initState() {
     super.initState();
     _controller.addListener(() => setState(() {}));
     _controller.loadMaps();
+    _loadRecentEvents();
+  }
+
+  Future<void> _loadRecentEvents() async {
+    try {
+      _loadingEvents = true;
+      setState(() {});
+      _recentEvents = await _eventService.getEventTimeline(pageSize: 5);
+    } catch (e) {
+      debugPrint('加载事件失败: $e');
+    } finally {
+      _loadingEvents = false;
+      setState(() {});
+    }
   }
 
   @override
@@ -37,6 +56,8 @@ class _WorldPageState extends State<WorldPage> {
                     _buildHeader(),
                     const SizedBox(height: 16),
                     _buildRegionsSection(context),
+                    const SizedBox(height: 16),
+                    _buildRecentEventsSection(context),
                   ],
                 ),
               ),
@@ -332,5 +353,180 @@ class _WorldPageState extends State<WorldPage> {
         ],
       ),
     );
+  }
+
+  Widget _buildRecentEventsSection(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                '最近事件',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              TextButton(
+                onPressed: () {},
+                child: const Text('查看全部'),
+              ),
+            ],
+          ),
+          if (_loadingEvents)
+            const Center(child: CircularProgressIndicator())
+          else if (_recentEvents.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Text('暂无事件'),
+            )
+          else
+            _buildEventTimeline(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEventTimeline() {
+    return Column(
+      children: _recentEvents
+          .asMap()
+          .entries
+          .map((entry) => _buildTimelineItem(
+                entry.value,
+                entry.key < _recentEvents.length - 1,
+              ))
+          .toList(),
+    );
+  }
+
+  Widget _buildTimelineItem(Event event, bool showLine) {
+    final color = _getColorForEventType(event.eventType);
+    final icon = _getIconForEventType(event.eventType);
+    final timeAgo = _formatTimeAgo(event.occurredAt);
+
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: color, size: 20),
+              ),
+              if (showLine)
+                Expanded(
+                  child: Container(
+                    width: 2,
+                    margin: const EdgeInsets.symmetric(vertical: 4),
+                    color: Colors.grey.shade300,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    event.eventTitle,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    event.sceneName,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    event.eventText,
+                    style: const TextStyle(color: Colors.grey),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    timeAgo,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getColorForEventType(String eventType) {
+    switch (eventType) {
+      case 'exploration':
+        return Colors.green;
+      case 'social':
+        return Colors.orange;
+      case 'study':
+        return Colors.blue;
+      case 'creative':
+        return Colors.purple;
+      case 'rest':
+        return Colors.teal;
+      case 'play':
+        return Colors.pink;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  IconData _getIconForEventType(String eventType) {
+    switch (eventType) {
+      case 'exploration':
+        return Icons.explore;
+      case 'social':
+        return Icons.people;
+      case 'study':
+        return Icons.book;
+      case 'creative':
+        return Icons.palette;
+      case 'rest':
+        return Icons.spa;
+      case 'play':
+        return Icons.sports_esports;
+      default:
+        return Icons.event;
+    }
+  }
+
+  String _formatTimeAgo(int timestamp) {
+    final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    final diff = now - timestamp;
+
+    if (diff < 3600) {
+      return '${diff ~/ 60}分钟前';
+    } else if (diff < 86400) {
+      return '${diff ~/ 3600}小时前';
+    } else if (diff < 604800) {
+      return '${diff ~/ 86400}天前';
+    } else {
+      return DateTime.fromMillisecondsSinceEpoch(timestamp * 1000)
+          .toString()
+          .substring(0, 10);
+    }
   }
 }

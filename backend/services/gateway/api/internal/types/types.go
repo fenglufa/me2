@@ -157,6 +157,7 @@ type EventResponse struct {
 	Id         int64  `json:"id"`
 	AvatarId   int64  `json:"avatar_id"`
 	EventType  string `json:"event_type"`
+	EventTitle string `json:"event_title"`
 	EventText  string `json:"event_text"`
 	ImageUrl   string `json:"image_url"`
 	SceneId    int64  `json:"scene_id"`

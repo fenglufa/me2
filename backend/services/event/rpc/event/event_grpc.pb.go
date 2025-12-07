@@ -19,10 +19,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Event_GenerateEvent_FullMethodName    = "/event.Event/GenerateEvent"
-	Event_GetEventTimeline_FullMethodName = "/event.Event/GetEventTimeline"
-	Event_GetEventDetail_FullMethodName   = "/event.Event/GetEventDetail"
-	Event_GetTemplates_FullMethodName     = "/event.Event/GetTemplates"
+	Event_GenerateEvent_FullMethodName        = "/event.Event/GenerateEvent"
+	Event_GetEventTimeline_FullMethodName     = "/event.Event/GetEventTimeline"
+	Event_GetUserEventTimeline_FullMethodName = "/event.Event/GetUserEventTimeline"
+	Event_GetEventDetail_FullMethodName       = "/event.Event/GetEventDetail"
+	Event_GetTemplates_FullMethodName         = "/event.Event/GetTemplates"
 )
 
 // EventClient is the client API for Event service.
@@ -33,8 +34,10 @@ const (
 type EventClient interface {
 	// 生成事件
 	GenerateEvent(ctx context.Context, in *GenerateEventRequest, opts ...grpc.CallOption) (*GenerateEventResponse, error)
-	// 获取事件时间线
+	// 获取事件时间线（按分身ID）
 	GetEventTimeline(ctx context.Context, in *GetEventTimelineRequest, opts ...grpc.CallOption) (*GetEventTimelineResponse, error)
+	// 获取事件时间线（按用户ID）
+	GetUserEventTimeline(ctx context.Context, in *GetUserEventTimelineRequest, opts ...grpc.CallOption) (*GetEventTimelineResponse, error)
 	// 获取事件详情
 	GetEventDetail(ctx context.Context, in *GetEventDetailRequest, opts ...grpc.CallOption) (*GetEventDetailResponse, error)
 	// 获取模板列表（后续可用于管理后台）
@@ -69,6 +72,16 @@ func (c *eventClient) GetEventTimeline(ctx context.Context, in *GetEventTimeline
 	return out, nil
 }
 
+func (c *eventClient) GetUserEventTimeline(ctx context.Context, in *GetUserEventTimelineRequest, opts ...grpc.CallOption) (*GetEventTimelineResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetEventTimelineResponse)
+	err := c.cc.Invoke(ctx, Event_GetUserEventTimeline_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *eventClient) GetEventDetail(ctx context.Context, in *GetEventDetailRequest, opts ...grpc.CallOption) (*GetEventDetailResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetEventDetailResponse)
@@ -97,8 +110,10 @@ func (c *eventClient) GetTemplates(ctx context.Context, in *GetTemplatesRequest,
 type EventServer interface {
 	// 生成事件
 	GenerateEvent(context.Context, *GenerateEventRequest) (*GenerateEventResponse, error)
-	// 获取事件时间线
+	// 获取事件时间线（按分身ID）
 	GetEventTimeline(context.Context, *GetEventTimelineRequest) (*GetEventTimelineResponse, error)
+	// 获取事件时间线（按用户ID）
+	GetUserEventTimeline(context.Context, *GetUserEventTimelineRequest) (*GetEventTimelineResponse, error)
 	// 获取事件详情
 	GetEventDetail(context.Context, *GetEventDetailRequest) (*GetEventDetailResponse, error)
 	// 获取模板列表（后续可用于管理后台）
@@ -118,6 +133,9 @@ func (UnimplementedEventServer) GenerateEvent(context.Context, *GenerateEventReq
 }
 func (UnimplementedEventServer) GetEventTimeline(context.Context, *GetEventTimelineRequest) (*GetEventTimelineResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetEventTimeline not implemented")
+}
+func (UnimplementedEventServer) GetUserEventTimeline(context.Context, *GetUserEventTimelineRequest) (*GetEventTimelineResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserEventTimeline not implemented")
 }
 func (UnimplementedEventServer) GetEventDetail(context.Context, *GetEventDetailRequest) (*GetEventDetailResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetEventDetail not implemented")
@@ -182,6 +200,24 @@ func _Event_GetEventTimeline_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Event_GetUserEventTimeline_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserEventTimelineRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EventServer).GetUserEventTimeline(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Event_GetUserEventTimeline_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EventServer).GetUserEventTimeline(ctx, req.(*GetUserEventTimelineRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Event_GetEventDetail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetEventDetailRequest)
 	if err := dec(in); err != nil {
@@ -232,6 +268,10 @@ var Event_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetEventTimeline",
 			Handler:    _Event_GetEventTimeline_Handler,
+		},
+		{
+			MethodName: "GetUserEventTimeline",
+			Handler:    _Event_GetUserEventTimeline_Handler,
 		},
 		{
 			MethodName: "GetEventDetail",

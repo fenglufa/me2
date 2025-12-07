@@ -29,10 +29,16 @@ func (s *EventServer) GenerateEvent(ctx context.Context, in *event.GenerateEvent
 	return l.GenerateEvent(in)
 }
 
-// 获取事件时间线
+// 获取事件时间线（按分身ID）
 func (s *EventServer) GetEventTimeline(ctx context.Context, in *event.GetEventTimelineRequest) (*event.GetEventTimelineResponse, error) {
 	l := logic.NewGetEventTimelineLogic(ctx, s.svcCtx)
 	return l.GetEventTimeline(in)
+}
+
+// 获取事件时间线（按用户ID）
+func (s *EventServer) GetUserEventTimeline(ctx context.Context, in *event.GetUserEventTimelineRequest) (*event.GetEventTimelineResponse, error) {
+	l := logic.NewGetUserEventTimelineLogic(ctx, s.svcCtx)
+	return l.GetUserEventTimeline(in)
 }
 
 // 获取事件详情

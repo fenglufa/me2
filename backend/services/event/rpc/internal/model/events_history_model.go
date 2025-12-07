@@ -12,6 +12,7 @@ import (
 type EventHistory struct {
 	Id                  int64          `db:"id"`
 	AvatarId            int64          `db:"avatar_id"`
+	UserId              int64          `db:"user_id"`
 	TemplateId          int64          `db:"template_id"`
 	EventType           string         `db:"event_type"`
 	EventTitle          string         `db:"event_title"`
@@ -38,12 +39,13 @@ func NewEventHistoryModel(conn sqlx.SqlConn) *EventHistoryModel {
 // Insert 插入事件历史
 func (m *EventHistoryModel) Insert(event *EventHistory) (sql.Result, error) {
 	query := `INSERT INTO events_history
-	          (avatar_id, template_id, event_type, event_title, event_text,
+	          (avatar_id, user_id, template_id, event_type, event_title, event_text,
 	           image_url, scene_id, scene_name, personality_changes, occurred_at)
-	          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
 	return m.conn.Exec(query,
 		event.AvatarId,
+		event.UserId,
 		event.TemplateId,
 		event.EventType,
 		event.EventTitle,
@@ -129,6 +131,45 @@ func (m *EventHistoryModel) FindLatestByAvatarId(avatarId int64, limit int) ([]*
 	}
 
 	return events, nil
+}
+
+// FindByUserId 查找用户的事件历史（分页）
+func (m *EventHistoryModel) FindByUserId(userId int64, page, pageSize int32) ([]*EventHistory, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 || pageSize > 100 {
+		pageSize = 20
+	}
+
+	offset := (page - 1) * pageSize
+
+	query := `SELECT id, avatar_id, user_id, template_id, event_type, event_title, event_text,
+	          image_url, scene_id, scene_name, personality_changes, occurred_at
+	          FROM events_history WHERE user_id = ?
+	          ORDER BY occurred_at DESC
+	          LIMIT ? OFFSET ?`
+
+	var events []*EventHistory
+	err := m.conn.QueryRows(&events, query, userId, pageSize, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	return events, nil
+}
+
+// CountByUserId 统计用户的事件数量
+func (m *EventHistoryModel) CountByUserId(userId int64) (int32, error) {
+	query := `SELECT COUNT(*) FROM events_history WHERE user_id = ?`
+
+	var count int32
+	err := m.conn.QueryRow(&count, query, userId)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
 }
 
 // Delete 删除事件（一般不需要，保留历史）
