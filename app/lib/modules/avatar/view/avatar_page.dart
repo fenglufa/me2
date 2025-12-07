@@ -8,6 +8,7 @@ import '../controller/avatar_controller.dart';
 import '../../../core/utils/image_picker_service.dart';
 import '../service/avatar_oss_upload_service.dart';
 import '../widget/personality_radar_chart.dart';
+import '../../diary/controller/diary_controller.dart';
 
 class AvatarPage extends ConsumerStatefulWidget {
   const AvatarPage({super.key});
@@ -540,6 +541,8 @@ class _AvatarPageState extends ConsumerState<AvatarPage> {
   }
 
   Widget _buildDiarySection(BuildContext context) {
+    final diariesAsync = ref.watch(avatarDiariesProvider);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -553,13 +556,36 @@ class _AvatarPageState extends ConsumerState<AvatarPage> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  context.push('/avatar-diaries');
+                },
                 child: const Text('查看全部'),
               ),
             ],
           ),
-          _buildDiaryCard('今天去了森林', '心情很好，遇见了小鹿', '2小时前'),
-          _buildDiaryCard('读完了一本书', '学到了很多新知识', '昨天'),
+          diariesAsync.when(
+            data: (response) {
+              if (response.list.isEmpty) {
+                return const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text('暂无日记', style: TextStyle(color: Colors.grey)),
+                );
+              }
+              final diaries = response.list.take(2).toList();
+              return Column(
+                children: diaries.map((diary) => _buildDiaryCard(
+                  diary.title,
+                  diary.content,
+                  diary.date,
+                )).toList(),
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, _) => Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text('加载失败: $error', style: const TextStyle(color: Colors.red)),
+            ),
+          ),
         ],
       ),
     );

@@ -4,6 +4,7 @@ import '../modules/main/view/main_page.dart';
 import '../modules/settings/view/settings_page.dart';
 import '../modules/profile/view/edit_profile_page.dart';
 import '../modules/avatar/view/edit_avatar_page.dart';
+import '../modules/diary/view/avatar_diaries_page.dart';
 import '../core/storage/token_storage.dart';
 
 final appRouter = GoRouter(
@@ -44,6 +45,10 @@ final appRouter = GoRouter(
         final avatarId = state.extra as int;
         return EditAvatarPage(avatarId: avatarId);
       },
+    ),
+    GoRoute(
+      path: '/avatar-diaries',
+      builder: (context, state) => const AvatarDiariesPage(),
     ),
   ],
 );
