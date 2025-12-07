@@ -47,7 +47,7 @@ func (l *CompleteAvatarUploadLogic) CompleteAvatarUpload(in *avatar.CompleteAvat
 		return nil, fmt.Errorf("分身不存在")
 	}
 
-	err = l.svcCtx.AvatarModel.UpdateProfile(av.AvatarId, av.Nickname, resp.Url)
+	err = l.svcCtx.AvatarModel.UpdateProfile(av.AvatarId, av.Nickname, resp.Url, 0, "", "", 0)
 	if err != nil {
 		l.Errorf("更新分身头像失败: %v", err)
 		return nil, fmt.Errorf("更新分身头像失败")

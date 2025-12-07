@@ -48,17 +48,21 @@ type AvatarCompleteResponse struct {
 }
 
 type AvatarResponse struct {
-	Id          int64   `json:"id"`
-	UserId      int64   `json:"user_id"`
-	Name        string  `json:"name"`
-	AvatarUrl   string  `json:"avatar_url"`
-	Warmth      float64 `json:"warmth"`
-	Adventurous float64 `json:"adventurous"`
-	Social      float64 `json:"social"`
-	Creative    float64 `json:"creative"`
-	Calm        float64 `json:"calm"`
-	Energetic   float64 `json:"energetic"`
-	CreatedAt   int64   `json:"created_at"`
+	Id            int64   `json:"id"`
+	UserId        int64   `json:"user_id"`
+	Name          string  `json:"name"`
+	AvatarUrl     string  `json:"avatar_url"`
+	Gender        int64   `json:"gender"`
+	BirthDate     string  `json:"birth_date"`
+	Occupation    string  `json:"occupation"`
+	MaritalStatus int64   `json:"marital_status"`
+	Warmth        float64 `json:"warmth"`
+	Adventurous   float64 `json:"adventurous"`
+	Social        float64 `json:"social"`
+	Creative      float64 `json:"creative"`
+	Calm          float64 `json:"calm"`
+	Energetic     float64 `json:"energetic"`
+	CreatedAt     int64   `json:"created_at"`
 }
 
 type AvatarTokenResponse struct {
@@ -273,9 +277,13 @@ type SubscriptionResponse struct {
 }
 
 type UpdateAvatarRequest struct {
-	Id        int64  `path:"id"`
-	Name      string `json:"name,optional"`
-	AvatarUrl string `json:"avatar_url,optional"`
+	Id            int64  `path:"id"`
+	Name          string `json:"name,optional"`
+	AvatarUrl     string `json:"avatar_url,optional"`
+	Gender        int64  `json:"gender,optional"`
+	BirthDate     string `json:"birth_date,optional"`
+	Occupation    string `json:"occupation,optional"`
+	MaritalStatus int64  `json:"marital_status,optional"`
 }
 
 type UpdatePersonalityRequest struct {

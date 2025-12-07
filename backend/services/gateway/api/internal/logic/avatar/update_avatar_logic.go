@@ -27,9 +27,13 @@ func NewUpdateAvatarLogic(ctx context.Context, svcCtx *svc.ServiceContext, avata
 
 func (l *UpdateAvatarLogic) UpdateAvatar(req *types.UpdateAvatarRequest) (resp *types.AvatarResponse, err error) {
 	_, err = l.svcCtx.AvatarRpc.UpdateAvatarProfile(l.ctx, &avatar.UpdateAvatarProfileRequest{
-		AvatarId:  l.avatarID,
-		Nickname:  req.Name,
-		AvatarUrl: req.AvatarUrl,
+		AvatarId:      l.avatarID,
+		Nickname:      req.Name,
+		AvatarUrl:     req.AvatarUrl,
+		Gender:        int32(req.Gender),
+		BirthDate:     req.BirthDate,
+		Occupation:    req.Occupation,
+		MaritalStatus: int32(req.MaritalStatus),
 	})
 	if err != nil {
 		return nil, err

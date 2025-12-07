@@ -24,7 +24,7 @@ func NewUpdateAvatarProfileLogic(ctx context.Context, svcCtx *svc.ServiceContext
 }
 
 func (l *UpdateAvatarProfileLogic) UpdateAvatarProfile(in *avatar.UpdateAvatarProfileRequest) (*avatar.UpdateAvatarProfileResponse, error) {
-	err := l.svcCtx.AvatarModel.UpdateProfile(in.AvatarId, in.Nickname, in.AvatarUrl)
+	err := l.svcCtx.AvatarModel.UpdateProfile(in.AvatarId, in.Nickname, in.AvatarUrl, in.Gender, in.BirthDate, in.Occupation, in.MaritalStatus)
 	if err != nil {
 		l.Errorf("更新分身资料失败: %v", err)
 		return &avatar.UpdateAvatarProfileResponse{Success: false}, err

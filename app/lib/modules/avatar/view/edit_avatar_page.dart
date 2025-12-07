@@ -18,18 +18,24 @@ class EditAvatarPage extends ConsumerStatefulWidget {
 
 class _EditAvatarPageState extends ConsumerState<EditAvatarPage> {
   late TextEditingController _nameController;
+  late TextEditingController _occupationController;
   XFile? _selectedImage;
   bool _isLoading = false;
+  int? _gender;
+  DateTime? _birthDate;
+  int? _maritalStatus;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController();
+    _occupationController = TextEditingController();
   }
 
   @override
   void dispose() {
     _nameController.dispose();
+    _occupationController.dispose();
     super.dispose();
   }
 
@@ -61,14 +67,25 @@ class _EditAvatarPageState extends ConsumerState<EditAvatarPage> {
 
       // Update avatar info
       final avatarService = ref.read(avatarServiceProvider);
+      final birthDateStr = _birthDate != null
+          ? '${_birthDate!.year.toString().padLeft(4, '0')}-'
+              '${_birthDate!.month.toString().padLeft(2, '0')}-'
+              '${_birthDate!.day.toString().padLeft(2, '0')}'
+          : null;
+
       await avatarService.updateAvatar(
         id: widget.avatarId,
         name: _nameController.text.trim().isEmpty ? null : _nameController.text.trim(),
         avatarUrl: avatarUrl,
+        gender: _gender,
+        birthDate: birthDateStr,
+        occupation: _occupationController.text.trim().isEmpty ? null : _occupationController.text.trim(),
+        maritalStatus: _maritalStatus,
       );
 
       // Refresh avatar info
       ref.invalidate(myAvatarProvider);
+      ref.invalidate(avatarProvider(widget.avatarId));
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -115,6 +132,15 @@ class _EditAvatarPageState extends ConsumerState<EditAvatarPage> {
         data: (avatar) {
           if (_nameController.text.isEmpty) {
             _nameController.text = avatar.name;
+            _occupationController.text = avatar.occupation;
+            _gender = avatar.gender;
+            _maritalStatus = avatar.maritalStatus;
+            if (avatar.birthDate.isNotEmpty) {
+              final parts = avatar.birthDate.split('-');
+              if (parts.length == 3) {
+                _birthDate = DateTime(int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
+              }
+            }
           }
 
           return SingleChildScrollView(
@@ -163,6 +189,64 @@ class _EditAvatarPageState extends ConsumerState<EditAvatarPage> {
                     labelText: '分身名称',
                     border: OutlineInputBorder(),
                   ),
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<int>(
+                  value: _gender,
+                  decoration: const InputDecoration(
+                    labelText: '性别',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 1, child: Text('男')),
+                    DropdownMenuItem(value: 2, child: Text('女')),
+                    DropdownMenuItem(value: 3, child: Text('其他')),
+                  ],
+                  onChanged: (value) => setState(() => _gender = value),
+                ),
+                const SizedBox(height: 16),
+                InkWell(
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: _birthDate ?? DateTime(2000),
+                      firstDate: DateTime(1900),
+                      lastDate: DateTime.now(),
+                    );
+                    if (picked != null) setState(() => _birthDate = picked);
+                  },
+                  child: InputDecorator(
+                    decoration: const InputDecoration(
+                      labelText: '出生日期',
+                      border: OutlineInputBorder(),
+                    ),
+                    child: Text(_birthDate != null
+                        ? '${_birthDate!.year}-${_birthDate!.month.toString().padLeft(2, '0')}-${_birthDate!.day.toString().padLeft(2, '0')}'
+                        : '请选择出生日期'),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _occupationController,
+                  decoration: const InputDecoration(
+                    labelText: '职业',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<int>(
+                  value: _maritalStatus,
+                  decoration: const InputDecoration(
+                    labelText: '婚姻状态',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 1, child: Text('单身')),
+                    DropdownMenuItem(value: 2, child: Text('恋爱中')),
+                    DropdownMenuItem(value: 3, child: Text('已婚')),
+                    DropdownMenuItem(value: 4, child: Text('其他')),
+                  ],
+                  onChanged: (value) => setState(() => _maritalStatus = value),
                 ),
               ],
             ),

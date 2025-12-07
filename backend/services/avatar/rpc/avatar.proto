@@ -70,6 +70,10 @@ message UpdateAvatarProfileRequest {
   int64 avatar_id = 1;
   string nickname = 2;         // 昵称（可选）
   string avatar_url = 3;       // 头像URL（可选）
+  int32 gender = 4;            // 性别（可选）
+  string birth_date = 5;       // 出生日期（可选）
+  string occupation = 6;       // 职业（可选）
+  int32 marital_status = 7;    // 婚姻状态（可选）
 }
 
 // 更新分身资料响应

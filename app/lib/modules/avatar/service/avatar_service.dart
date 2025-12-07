@@ -45,12 +45,20 @@ class AvatarService {
     required int id,
     String? name,
     String? avatarUrl,
+    int? gender,
+    String? birthDate,
+    String? occupation,
+    int? maritalStatus,
   }) async {
     final response = await _dio.patch(
       '${ApiEndpoints.avatarDetail}/$id',
       data: {
         if (name != null) 'name': name,
         if (avatarUrl != null) 'avatar_url': avatarUrl,
+        if (gender != null) 'gender': gender,
+        if (birthDate != null) 'birth_date': birthDate,
+        if (occupation != null) 'occupation': occupation,
+        if (maritalStatus != null) 'marital_status': maritalStatus,
       },
     );
     return AvatarInfo.fromJson(response.data);

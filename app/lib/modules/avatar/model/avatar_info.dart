@@ -3,6 +3,10 @@ class AvatarInfo {
   final int userId;
   final String name;
   final String avatarUrl;
+  final int gender;
+  final String birthDate;
+  final String occupation;
+  final int maritalStatus;
   final double warmth;
   final double adventurous;
   final double social;
@@ -16,6 +20,10 @@ class AvatarInfo {
     required this.userId,
     required this.name,
     required this.avatarUrl,
+    required this.gender,
+    required this.birthDate,
+    required this.occupation,
+    required this.maritalStatus,
     required this.warmth,
     required this.adventurous,
     required this.social,
@@ -31,6 +39,10 @@ class AvatarInfo {
       userId: json['user_id'] ?? 0,
       name: json['name'] ?? '',
       avatarUrl: json['avatar_url'] ?? '',
+      gender: json['gender'] ?? 1,
+      birthDate: json['birth_date'] ?? '',
+      occupation: json['occupation'] ?? '',
+      maritalStatus: json['marital_status'] ?? 1,
       warmth: (json['warmth'] ?? 0.0).toDouble(),
       adventurous: (json['adventurous'] ?? 0.0).toDouble(),
       social: (json['social'] ?? 0.0).toDouble(),
@@ -47,6 +59,10 @@ class AvatarInfo {
       'user_id': userId,
       'name': name,
       'avatar_url': avatarUrl,
+      'gender': gender,
+      'birth_date': birthDate,
+      'occupation': occupation,
+      'marital_status': maritalStatus,
       'warmth': warmth,
       'adventurous': adventurous,
       'social': social,
