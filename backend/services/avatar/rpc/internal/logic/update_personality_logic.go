@@ -60,14 +60,17 @@ func (l *UpdatePersonalityLogic) UpdatePersonality(in *avatar.UpdatePersonalityR
 	newCalm := clamp(av.Calm+changes["calm"], 0, 100)
 	newEnergetic := clamp(av.Energetic+changes["energetic"], 0, 100)
 
-	// 5. 更新 avatars 表
-	err = l.svcCtx.AvatarModel.UpdatePersonality(in.AvatarId, newWarmth, newAdventurous, newSocial, newCreative, newCalm, newEnergetic)
+	// 5. 重新计算人格类型
+	personalityType := CalculatePersonalityType(newWarmth, newAdventurous, newSocial, newCreative, newCalm, newEnergetic)
+
+	// 6. 更新 avatars 表
+	err = l.svcCtx.AvatarModel.UpdatePersonality(in.AvatarId, newWarmth, newAdventurous, newSocial, newCreative, newCalm, newEnergetic, personalityType)
 	if err != nil {
 		l.Errorf("更新人格失败: %v", err)
 		return nil, fmt.Errorf("failed to update personality: %w", err)
 	}
 
-	// 6. 记录变化后的人格值
+	// 7. 记录变化后的人格值
 	after := &avatar.PersonalityInfo{
 		Warmth:      newWarmth,
 		Adventurous: newAdventurous,

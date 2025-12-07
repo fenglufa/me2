@@ -420,8 +420,6 @@ class _AvatarPageState extends ConsumerState<AvatarPage> {
                   avatar.name,
                   style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 4),
-                const Text('成长等级 Lv.5', style: TextStyle(color: Colors.grey)),
               ],
             ),
           ),
@@ -454,10 +452,44 @@ class _AvatarPageState extends ConsumerState<AvatarPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '人格面板',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                '人格面板',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              if (avatar.personalityTypeName.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.purple.shade400, Colors.purple.shade600],
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    avatar.personalityTypeName,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+            ],
           ),
+          if (avatar.personalityTypeDescription.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              avatar.personalityTypeDescription,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
           const SizedBox(height: 16),
           SizedBox(
             height: 200,

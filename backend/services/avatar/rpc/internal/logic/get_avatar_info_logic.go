@@ -32,14 +32,17 @@ func (l *GetAvatarInfoLogic) GetAvatarInfo(in *avatar.GetAvatarInfoRequest) (*av
 
 	return &avatar.GetAvatarInfoResponse{
 		Avatar: &avatar.AvatarInfo{
-			AvatarId:      av.AvatarId,
-			UserId:        av.UserId,
-			Nickname:      av.Nickname,
-			AvatarUrl:     av.AvatarUrl,
-			Gender:        av.Gender,
-			BirthDate:     av.BirthDate,
-			Occupation:    av.Occupation,
-			MaritalStatus: av.MaritalStatus,
+			AvatarId:                  av.AvatarId,
+			UserId:                    av.UserId,
+			Nickname:                  av.Nickname,
+			AvatarUrl:                 av.AvatarUrl,
+			Gender:                    av.Gender,
+			BirthDate:                 av.BirthDate,
+			Occupation:                av.Occupation,
+			MaritalStatus:             av.MaritalStatus,
+			PersonalityType:           av.PersonalityType,
+			PersonalityTypeName:       GetPersonalityTypeName(av.PersonalityType),
+			PersonalityTypeDescription: GetPersonalityTypeDescription(av.PersonalityType),
 			Personality: &avatar.PersonalityInfo{
 				Warmth:      av.Warmth,
 				Adventurous: av.Adventurous,

@@ -14,6 +14,9 @@ class AvatarInfo {
   final double calm;
   final double energetic;
   final int createdAt;
+  final String personalityType;
+  final String personalityTypeName;
+  final String personalityTypeDescription;
 
   AvatarInfo({
     required this.id,
@@ -31,6 +34,9 @@ class AvatarInfo {
     required this.calm,
     required this.energetic,
     required this.createdAt,
+    required this.personalityType,
+    required this.personalityTypeName,
+    required this.personalityTypeDescription,
   });
 
   factory AvatarInfo.fromJson(Map<String, dynamic> json) {
@@ -50,6 +56,9 @@ class AvatarInfo {
       calm: (json['calm'] ?? 0.0).toDouble() / 100,
       energetic: (json['energetic'] ?? 0.0).toDouble() / 100,
       createdAt: json['created_at'] ?? 0,
+      personalityType: json['personality_type'] ?? '',
+      personalityTypeName: json['personality_type_name'] ?? '',
+      personalityTypeDescription: json['personality_type_description'] ?? '',
     );
   }
 
@@ -70,6 +79,9 @@ class AvatarInfo {
       'calm': calm,
       'energetic': energetic,
       'created_at': createdAt,
+      'personality_type': personalityType,
+      'personality_type_name': personalityTypeName,
+      'personality_type_description': personalityTypeDescription,
     };
   }
 }

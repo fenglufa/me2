@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS avatars (
     creative TINYINT DEFAULT 50 COMMENT '创造性 0-100',
     calm TINYINT DEFAULT 50 COMMENT '情绪稳定性 0-100',
     energetic TINYINT DEFAULT 50 COMMENT '生活动力 0-100',
+    personality_type VARCHAR(50) DEFAULT '' COMMENT '人格类型：comforter/explorer/mentor/poet/tsundere/companion/creator/socializer',
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
