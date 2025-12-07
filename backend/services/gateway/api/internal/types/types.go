@@ -106,9 +106,22 @@ type CreateAvatarRequest struct {
 	MaritalStatus int64  `json:"marital_status"` // 婚姻状态 1:单身 2:恋爱中 3:已婚 4:其他
 }
 
+type CreateSessionRequest struct {
+	AvatarId int64  `json:"avatar_id"`
+	Title    string `json:"title,optional"`
+}
+
+type CreateSessionResponse struct {
+	SessionId int64 `json:"session_id"`
+}
+
 type CreateUserDiaryRequest struct {
 	Content string `json:"content"`
 	Mood    string `json:"mood,optional"`
+}
+
+type DeleteSessionResponse struct {
+	Success bool `json:"success"`
 }
 
 type DiaryListRequest struct {
@@ -181,12 +194,37 @@ type GetMapRequest struct {
 	Id int64 `path:"id"`
 }
 
+type GetMessagesRequest struct {
+	Page     int32 `form:"page,default=1"`
+	PageSize int32 `form:"page_size,default=50"`
+}
+
+type GetMessagesResponse struct {
+	Messages []Message `json:"messages"`
+	Total    int64     `json:"total"`
+}
+
 type GetRegionRequest struct {
 	Id int64 `path:"id"`
 }
 
 type GetSceneRequest struct {
 	Id int64 `path:"id"`
+}
+
+type GetSessionInfoResponse struct {
+	Session SessionInfo `json:"session"`
+}
+
+type GetSessionsRequest struct {
+	AvatarId int64 `form:"avatar_id"`
+	Page     int32 `form:"page,default=1"`
+	PageSize int32 `form:"page_size,default=20"`
+}
+
+type GetSessionsResponse struct {
+	Sessions []SessionInfo `json:"sessions"`
+	Total    int64         `json:"total"`
 }
 
 type LoginRequest struct {
@@ -211,6 +249,14 @@ type MapListResponse struct {
 	Page     int                `json:"page"`
 	PageSize int                `json:"page_size"`
 	List     []WorldMapResponse `json:"list"`
+}
+
+type Message struct {
+	Id        int64  `json:"id"`
+	SessionId int64  `json:"session_id"`
+	Role      string `json:"role"`
+	Content   string `json:"content"`
+	CreatedAt int64  `json:"created_at"`
 }
 
 type RegionListRequest struct {
@@ -271,6 +317,16 @@ type SceneRecommendationResponse struct {
 
 type SendCodeRequest struct {
 	Phone string `json:"phone"`
+}
+
+type SessionInfo struct {
+	Id          int64  `json:"id"`
+	UserId      int64  `json:"user_id"`
+	AvatarId    int64  `json:"avatar_id"`
+	Title       string `json:"title"`
+	LastMessage string `json:"last_message"`
+	CreatedAt   int64  `json:"created_at"`
+	UpdatedAt   int64  `json:"updated_at"`
 }
 
 type SubscriptionResponse struct {

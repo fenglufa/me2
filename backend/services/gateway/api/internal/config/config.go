@@ -11,10 +11,11 @@ type Config struct {
 		AccessSecret string
 		AccessExpire int64
 	}
-	UserRpc   zrpc.RpcClientConf
-	AvatarRpc zrpc.RpcClientConf
-	WorldRpc  zrpc.RpcClientConf
-	EventRpc  zrpc.RpcClientConf
-	ActionRpc zrpc.RpcClientConf
-	DiaryRpc  zrpc.RpcClientConf
+	UserRpc     zrpc.RpcClientConf
+	AvatarRpc   zrpc.RpcClientConf
+	WorldRpc    zrpc.RpcClientConf
+	EventRpc    zrpc.RpcClientConf
+	ActionRpc   zrpc.RpcClientConf
+	DiaryRpc    zrpc.RpcClientConf
+	DialogueRpc zrpc.RpcClientConf
 }

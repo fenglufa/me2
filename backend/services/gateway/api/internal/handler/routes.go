@@ -8,6 +8,7 @@ import (
 
 	action "github.com/me2/gateway/api/internal/handler/action"
 	avatar "github.com/me2/gateway/api/internal/handler/avatar"
+	dialogue "github.com/me2/gateway/api/internal/handler/dialogue"
 	diary "github.com/me2/gateway/api/internal/handler/diary"
 	event "github.com/me2/gateway/api/internal/handler/event"
 	user "github.com/me2/gateway/api/internal/handler/user"
@@ -94,6 +95,43 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			}...,
 		),
 		rest.WithPrefix("/api/v1/avatar"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// 获取对话历史
+				Method:  http.MethodGet,
+				Path:    "/messages/:session_id",
+				Handler: dialogue.GetMessagesHandler(serverCtx),
+			},
+			{
+				// 创建会话
+				Method:  http.MethodPost,
+				Path:    "/sessions",
+				Handler: dialogue.CreateSessionHandler(serverCtx),
+			},
+			{
+				// 获取会话列表
+				Method:  http.MethodGet,
+				Path:    "/sessions",
+				Handler: dialogue.GetSessionsHandler(serverCtx),
+			},
+			{
+				// 获取会话详情
+				Method:  http.MethodGet,
+				Path:    "/sessions/:id",
+				Handler: dialogue.GetSessionInfoHandler(serverCtx),
+			},
+			{
+				// 删除会话
+				Method:  http.MethodDelete,
+				Path:    "/sessions/:id",
+				Handler: dialogue.DeleteSessionHandler(serverCtx),
+			},
+		},
+		rest.WithJwt(serverCtx.Config.Auth.AccessSecret),
+		rest.WithPrefix("/api/v1/dialogue"),
 	)
 
 	server.AddRoutes(

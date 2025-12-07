@@ -1,0 +1,103 @@
+syntax = "v1"
+
+info (
+	title:   "对话服务 API"
+	desc:    "AI 分身对话相关接口"
+	author:  "ME2 Team"
+	version: "v1.0"
+)
+
+type (
+	// 创建会话请求
+	CreateSessionRequest {
+		AvatarId int64  `json:"avatar_id"`
+		Title    string `json:"title,optional"`
+	}
+
+	// 创建会话响应
+	CreateSessionResponse {
+		SessionId int64 `json:"session_id"`
+	}
+
+	// 会话信息
+	SessionInfo {
+		Id          int64  `json:"id"`
+		UserId      int64  `json:"user_id"`
+		AvatarId    int64  `json:"avatar_id"`
+		Title       string `json:"title"`
+		LastMessage string `json:"last_message"`
+		CreatedAt   int64  `json:"created_at"`
+		UpdatedAt   int64  `json:"updated_at"`
+	}
+
+	// 获取会话列表请求
+	GetSessionsRequest {
+		AvatarId int64 `form:"avatar_id"`
+		Page     int32 `form:"page,default=1"`
+		PageSize int32 `form:"page_size,default=20"`
+	}
+
+	// 获取会话列表响应
+	GetSessionsResponse {
+		Sessions []SessionInfo `json:"sessions"`
+		Total    int64         `json:"total"`
+	}
+
+	// 获取会话详情响应
+	GetSessionInfoResponse {
+		Session SessionInfo `json:"session"`
+	}
+
+	// 消息
+	Message {
+		Id        int64  `json:"id"`
+		SessionId int64  `json:"session_id"`
+		Role      string `json:"role"`
+		Content   string `json:"content"`
+		CreatedAt int64  `json:"created_at"`
+	}
+
+	// 获取对话历史请求
+	GetMessagesRequest {
+		Page     int32 `form:"page,default=1"`
+		PageSize int32 `form:"page_size,default=50"`
+	}
+
+	// 获取对话历史响应
+	GetMessagesResponse {
+		Messages []Message `json:"messages"`
+		Total    int64     `json:"total"`
+	}
+
+	// 删除会话响应
+	DeleteSessionResponse {
+		Success bool `json:"success"`
+	}
+)
+
+@server (
+	prefix: /api/v1/dialogue
+	jwt:    Auth
+	group:  dialogue
+)
+service gateway {
+	@doc "创建会话"
+	@handler createSession
+	post /sessions (CreateSessionRequest) returns (CreateSessionResponse)
+
+	@doc "获取会话列表"
+	@handler getSessions
+	get /sessions (GetSessionsRequest) returns (GetSessionsResponse)
+
+	@doc "获取会话详情"
+	@handler getSessionInfo
+	get /sessions/:id returns (GetSessionInfoResponse)
+
+	@doc "获取对话历史"
+	@handler getMessages
+	get /messages/:session_id (GetMessagesRequest) returns (GetMessagesResponse)
+
+	@doc "删除会话"
+	@handler deleteSession
+	delete /sessions/:id returns (DeleteSessionResponse)
+}

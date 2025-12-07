@@ -4,10 +4,12 @@ go 1.24.11
 
 require (
 	github.com/golang-jwt/jwt/v4 v4.5.2
+	github.com/gorilla/websocket v1.5.3
 	github.com/me2/action v0.0.0-00010101000000-000000000000
-	github.com/me2/avatar v0.0.0-00010101000000-000000000000
+	github.com/me2/avatar v0.0.0
+	github.com/me2/dialogue/rpc v0.0.0-00010101000000-000000000000
 	github.com/me2/diary v0.0.0-00010101000000-000000000000
-	github.com/me2/event v0.0.0-00010101000000-000000000000
+	github.com/me2/event v0.0.0
 	github.com/me2/pkg v0.0.1
 	github.com/me2/user/rpc v0.0.0-00010101000000-000000000000
 	github.com/me2/world/rpc v0.0.0-00010101000000-000000000000
@@ -113,3 +115,5 @@ replace github.com/me2/event => ../event
 replace github.com/me2/action => ../action
 
 replace github.com/me2/diary => ../diary
+
+replace github.com/me2/dialogue/rpc => ../dialogue/rpc
