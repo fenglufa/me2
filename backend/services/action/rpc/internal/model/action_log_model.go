@@ -11,6 +11,7 @@ import (
 type ActionLog struct {
 	Id            int64     `db:"id"`
 	AvatarId      int64     `db:"avatar_id"`
+	UserId        int64     `db:"user_id"`
 	ActionType    string    `db:"action_type"`
 	SceneId       int64     `db:"scene_id"`
 	SceneName     string    `db:"scene_name"`
@@ -32,9 +33,9 @@ func NewActionLogModel(conn sqlx.SqlConn) *ActionLogModel {
 
 // Insert 插入行动日志
 func (m *ActionLogModel) Insert(log *ActionLog) (sql.Result, error) {
-	query := `INSERT INTO action_logs (avatar_id, action_type, scene_id, scene_name,
-		intent_score, trigger_reason, event_id) VALUES (?, ?, ?, ?, ?, ?, ?)`
-	return m.conn.Exec(query, log.AvatarId, log.ActionType, log.SceneId, log.SceneName,
+	query := `INSERT INTO action_logs (avatar_id, user_id, action_type, scene_id, scene_name,
+		intent_score, trigger_reason, event_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+	return m.conn.Exec(query, log.AvatarId, log.UserId, log.ActionType, log.SceneId, log.SceneName,
 		log.IntentScore, log.TriggerReason, log.EventId)
 }
 
@@ -51,7 +52,7 @@ func (m *ActionLogModel) FindByAvatarId(avatarId int64, page, pageSize int32) ([
 	}
 
 	// 查询列表
-	query := `SELECT id, avatar_id, action_type, scene_id, scene_name, intent_score,
+	query := `SELECT id, avatar_id, user_id, action_type, scene_id, scene_name, intent_score,
 		trigger_reason, event_id, created_at FROM action_logs
 		WHERE avatar_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?`
 	var logs []*ActionLog
@@ -65,11 +66,27 @@ func (m *ActionLogModel) FindByAvatarId(avatarId int64, page, pageSize int32) ([
 
 // FindLastByAvatarId 查询分身最近一次行动
 func (m *ActionLogModel) FindLastByAvatarId(avatarId int64) (*ActionLog, error) {
-	query := `SELECT id, avatar_id, action_type, scene_id, scene_name, intent_score,
+	query := `SELECT id, avatar_id, user_id, action_type, scene_id, scene_name, intent_score,
 		trigger_reason, event_id, created_at FROM action_logs
 		WHERE avatar_id = ? ORDER BY created_at DESC LIMIT 1`
 	var log ActionLog
 	err := m.conn.QueryRow(&log, query, avatarId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &log, nil
+}
+
+// FindLastByUserId 查询用户最近一次行动
+func (m *ActionLogModel) FindLastByUserId(userId int64) (*ActionLog, error) {
+	query := `SELECT id, avatar_id, user_id, action_type, scene_id, scene_name, intent_score,
+		trigger_reason, event_id, created_at FROM action_logs
+		WHERE user_id = ? ORDER BY created_at DESC LIMIT 1`
+	var log ActionLog
+	err := m.conn.QueryRow(&log, query, userId)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil

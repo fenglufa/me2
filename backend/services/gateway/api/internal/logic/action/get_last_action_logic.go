@@ -26,11 +26,15 @@ func NewGetLastActionLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Get
 func (l *GetLastActionLogic) GetLastAction() (resp *types.ActionLogResponse, err error) {
 	userID := l.ctx.Value("user_id").(int64)
 
-	rpcResp, err := l.svcCtx.ActionRpc.GetLastAction(l.ctx, &action.GetLastActionRequest{
-		AvatarId: userID,
+	rpcResp, err := l.svcCtx.ActionRpc.GetLastActionByUser(l.ctx, &action.GetLastActionByUserRequest{
+		UserId: userID,
 	})
 	if err != nil {
 		return nil, err
+	}
+
+	if rpcResp.Action == nil {
+		return &types.ActionLogResponse{}, nil
 	}
 
 	return &types.ActionLogResponse{

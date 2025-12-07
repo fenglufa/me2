@@ -23,6 +23,7 @@ const (
 	Action_CalculateActionIntent_FullMethodName = "/action.Action/CalculateActionIntent"
 	Action_GetActionHistory_FullMethodName      = "/action.Action/GetActionHistory"
 	Action_GetLastAction_FullMethodName         = "/action.Action/GetLastAction"
+	Action_GetLastActionByUser_FullMethodName   = "/action.Action/GetLastActionByUser"
 )
 
 // ActionClient is the client API for Action service.
@@ -39,6 +40,8 @@ type ActionClient interface {
 	GetActionHistory(ctx context.Context, in *GetActionHistoryRequest, opts ...grpc.CallOption) (*GetActionHistoryResponse, error)
 	// 获取最近一次行动
 	GetLastAction(ctx context.Context, in *GetLastActionRequest, opts ...grpc.CallOption) (*GetLastActionResponse, error)
+	// 获取用户最近一次行动
+	GetLastActionByUser(ctx context.Context, in *GetLastActionByUserRequest, opts ...grpc.CallOption) (*GetLastActionByUserResponse, error)
 }
 
 type actionClient struct {
@@ -89,6 +92,16 @@ func (c *actionClient) GetLastAction(ctx context.Context, in *GetLastActionReque
 	return out, nil
 }
 
+func (c *actionClient) GetLastActionByUser(ctx context.Context, in *GetLastActionByUserRequest, opts ...grpc.CallOption) (*GetLastActionByUserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetLastActionByUserResponse)
+	err := c.cc.Invoke(ctx, Action_GetLastActionByUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ActionServer is the server API for Action service.
 // All implementations must embed UnimplementedActionServer
 // for forward compatibility.
@@ -103,6 +116,8 @@ type ActionServer interface {
 	GetActionHistory(context.Context, *GetActionHistoryRequest) (*GetActionHistoryResponse, error)
 	// 获取最近一次行动
 	GetLastAction(context.Context, *GetLastActionRequest) (*GetLastActionResponse, error)
+	// 获取用户最近一次行动
+	GetLastActionByUser(context.Context, *GetLastActionByUserRequest) (*GetLastActionByUserResponse, error)
 	mustEmbedUnimplementedActionServer()
 }
 
@@ -124,6 +139,9 @@ func (UnimplementedActionServer) GetActionHistory(context.Context, *GetActionHis
 }
 func (UnimplementedActionServer) GetLastAction(context.Context, *GetLastActionRequest) (*GetLastActionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetLastAction not implemented")
+}
+func (UnimplementedActionServer) GetLastActionByUser(context.Context, *GetLastActionByUserRequest) (*GetLastActionByUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetLastActionByUser not implemented")
 }
 func (UnimplementedActionServer) mustEmbedUnimplementedActionServer() {}
 func (UnimplementedActionServer) testEmbeddedByValue()                {}
@@ -218,6 +236,24 @@ func _Action_GetLastAction_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Action_GetLastActionByUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetLastActionByUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ActionServer).GetLastActionByUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Action_GetLastActionByUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ActionServer).GetLastActionByUser(ctx, req.(*GetLastActionByUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Action_ServiceDesc is the grpc.ServiceDesc for Action service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -240,6 +276,10 @@ var Action_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetLastAction",
 			Handler:    _Action_GetLastAction_Handler,
+		},
+		{
+			MethodName: "GetLastActionByUser",
+			Handler:    _Action_GetLastActionByUser_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

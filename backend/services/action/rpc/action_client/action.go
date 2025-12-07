@@ -20,6 +20,8 @@ type (
 	CalculateActionIntentResponse = action.CalculateActionIntentResponse
 	GetActionHistoryRequest       = action.GetActionHistoryRequest
 	GetActionHistoryResponse      = action.GetActionHistoryResponse
+	GetLastActionByUserRequest    = action.GetLastActionByUserRequest
+	GetLastActionByUserResponse   = action.GetLastActionByUserResponse
 	GetLastActionRequest          = action.GetLastActionRequest
 	GetLastActionResponse         = action.GetLastActionResponse
 	ScheduleActionRequest         = action.ScheduleActionRequest
@@ -34,6 +36,8 @@ type (
 		GetActionHistory(ctx context.Context, in *GetActionHistoryRequest, opts ...grpc.CallOption) (*GetActionHistoryResponse, error)
 		// 获取最近一次行动
 		GetLastAction(ctx context.Context, in *GetLastActionRequest, opts ...grpc.CallOption) (*GetLastActionResponse, error)
+		// 获取用户最近一次行动
+		GetLastActionByUser(ctx context.Context, in *GetLastActionByUserRequest, opts ...grpc.CallOption) (*GetLastActionByUserResponse, error)
 	}
 
 	defaultAction struct {
@@ -69,4 +73,10 @@ func (m *defaultAction) GetActionHistory(ctx context.Context, in *GetActionHisto
 func (m *defaultAction) GetLastAction(ctx context.Context, in *GetLastActionRequest, opts ...grpc.CallOption) (*GetLastActionResponse, error) {
 	client := action.NewActionClient(m.cli.Conn())
 	return client.GetLastAction(ctx, in, opts...)
+}
+
+// 获取用户最近一次行动
+func (m *defaultAction) GetLastActionByUser(ctx context.Context, in *GetLastActionByUserRequest, opts ...grpc.CallOption) (*GetLastActionByUserResponse, error) {
+	client := action.NewActionClient(m.cli.Conn())
+	return client.GetLastActionByUser(ctx, in, opts...)
 }

@@ -46,3 +46,9 @@ func (s *ActionServer) GetLastAction(ctx context.Context, in *action.GetLastActi
 	l := logic.NewGetLastActionLogic(ctx, s.svcCtx)
 	return l.GetLastAction(in)
 }
+
+// 获取用户最近一次行动
+func (s *ActionServer) GetLastActionByUser(ctx context.Context, in *action.GetLastActionByUserRequest) (*action.GetLastActionByUserResponse, error) {
+	l := logic.NewGetLastActionByUserLogic(ctx, s.svcCtx)
+	return l.GetLastActionByUser(in)
+}

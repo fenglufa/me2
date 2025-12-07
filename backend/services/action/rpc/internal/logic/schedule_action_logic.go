@@ -64,6 +64,7 @@ func (l *ScheduleActionLogic) ScheduleAction(in *action.ScheduleActionRequest) (
 	// 6. 记录行动日志
 	actionLog := &model.ActionLog{
 		AvatarId:      in.AvatarId,
+		UserId:        avatarResp.Avatar.UserId,
 		ActionType:    bestIntent.ActionType,
 		SceneId:       selectedScene.Scene.Id,
 		SceneName:     selectedScene.Scene.Name,

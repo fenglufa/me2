@@ -16,6 +16,9 @@ service Action {
 
   // 获取最近一次行动
   rpc GetLastAction(GetLastActionRequest) returns (GetLastActionResponse);
+
+  // 获取用户最近一次行动
+  rpc GetLastActionByUser(GetLastActionByUserRequest) returns (GetLastActionByUserResponse);
 }
 
 // ========== 调度行动 ==========
@@ -65,6 +68,16 @@ message GetLastActionRequest {
 }
 
 message GetLastActionResponse {
+  ActionLog action = 1;  // 最近一次行动记录
+}
+
+// ========== 获取用户最近一次行动 ==========
+
+message GetLastActionByUserRequest {
+  int64 user_id = 1;  // 用户ID
+}
+
+message GetLastActionByUserResponse {
   ActionLog action = 1;  // 最近一次行动记录
 }
 
