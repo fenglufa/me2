@@ -144,8 +144,9 @@ func (b *ContextBuilder) SaveMessage(sessionID int64, role, content string) (int
 
 func (b *ContextBuilder) UpdateSessionLastMessage(sessionID int64, message string) error {
 	truncated := message
-	if len(message) > 50 {
-		truncated = message[:50] + "..."
+	runes := []rune(message)
+	if len(runes) > 50 {
+		truncated = string(runes[:50]) + "..."
 	}
 	return b.svcCtx.SessionModel.UpdateLastMessage(sessionID, truncated)
 }

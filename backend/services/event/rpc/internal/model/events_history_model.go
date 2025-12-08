@@ -84,7 +84,7 @@ func (m *EventHistoryModel) FindByAvatarId(avatarId int64, page, pageSize int32)
 
 	offset := (page - 1) * pageSize
 
-	query := `SELECT id, avatar_id, template_id, event_type, event_title, event_text,
+	query := `SELECT id, avatar_id, user_id, template_id, event_type, event_title, event_text,
 	          image_url, scene_id, scene_name, personality_changes, occurred_at
 	          FROM events_history WHERE avatar_id = ?
 	          ORDER BY occurred_at DESC

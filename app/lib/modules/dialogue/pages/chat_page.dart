@@ -105,15 +105,19 @@ class _ChatPageState extends State<ChatPage> {
       (data) {
         final response = jsonDecode(data);
         setState(() {
-          _streamingContent += response['content'];
+          if (response['content'] != null && response['content'].isNotEmpty) {
+            _streamingContent += response['content'];
+          }
           if (response['done'] == true) {
-            _messages.add(Message(
-              id: response['message_id'] ?? 0,
-              sessionId: _sessionId!,
-              role: 'assistant',
-              content: _streamingContent,
-              createdAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-            ));
+            if (_streamingContent.isNotEmpty) {
+              _messages.add(Message(
+                id: response['message_id'] ?? 0,
+                sessionId: _sessionId!,
+                role: 'assistant',
+                content: _streamingContent,
+                createdAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+              ));
+            }
             _streaming = false;
             _streamingContent = '';
           }
