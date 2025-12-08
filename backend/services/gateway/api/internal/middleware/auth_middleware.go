@@ -48,7 +48,17 @@ func (m *AuthMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		userID := int64(claims["user_id"].(float64))
+		var userID int64
+		switch v := claims["user_id"].(type) {
+		case float64:
+			userID = int64(v)
+		case int64:
+			userID = v
+		default:
+			response.HttpError(w, errcode.ErrInvalidToken)
+			return
+		}
+
 		ctx := context.WithValue(r.Context(), "user_id", userID)
 		next(w, r.WithContext(ctx))
 	}

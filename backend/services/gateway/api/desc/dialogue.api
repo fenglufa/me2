@@ -43,9 +43,19 @@ type (
 		Total    int64         `json:"total"`
 	}
 
+	// 获取会话详情请求
+	GetSessionInfoRequest {
+		Id int64 `path:"id"`
+	}
+
 	// 获取会话详情响应
 	GetSessionInfoResponse {
 		Session SessionInfo `json:"session"`
+	}
+
+	// 删除会话请求
+	DeleteSessionRequest {
+		Id int64 `path:"id"`
 	}
 
 	// 消息
@@ -59,8 +69,9 @@ type (
 
 	// 获取对话历史请求
 	GetMessagesRequest {
-		Page     int32 `form:"page,default=1"`
-		PageSize int32 `form:"page_size,default=50"`
+		SessionId int64 `path:"session_id"`
+		Page      int32 `form:"page,default=1"`
+		PageSize  int32 `form:"page_size,default=50"`
 	}
 
 	// 获取对话历史响应
@@ -76,9 +87,9 @@ type (
 )
 
 @server (
-	prefix: /api/v1/dialogue
-	jwt:    Auth
-	group:  dialogue
+	prefix:     /api/v1/dialogue
+	middleware: Auth
+	group:      dialogue
 )
 service gateway {
 	@doc "创建会话"
@@ -91,7 +102,7 @@ service gateway {
 
 	@doc "获取会话详情"
 	@handler getSessionInfo
-	get /sessions/:id returns (GetSessionInfoResponse)
+	get /sessions/:id (GetSessionInfoRequest) returns (GetSessionInfoResponse)
 
 	@doc "获取对话历史"
 	@handler getMessages
@@ -99,5 +110,5 @@ service gateway {
 
 	@doc "删除会话"
 	@handler deleteSession
-	delete /sessions/:id returns (DeleteSessionResponse)
+	delete /sessions/:id (DeleteSessionRequest) returns (DeleteSessionResponse)
 }

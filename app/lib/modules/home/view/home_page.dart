@@ -3,6 +3,9 @@ import '../../event/models/event_models.dart';
 import '../../event/services/event_service.dart';
 import '../../action/models/action_models.dart';
 import '../../action/services/action_service.dart';
+import '../../avatar/service/avatar_service.dart';
+import '../../avatar/model/avatar_info.dart';
+import '../../dialogue/pages/chat_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,16 +17,33 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final _eventService = EventService();
   final _actionService = ActionService();
+  final _avatarService = AvatarService();
   List<Event> _recentEvents = [];
   ActionLog? _lastAction;
+  AvatarInfo? _avatar;
   bool _loadingEvents = false;
   bool _loadingAction = false;
+  bool _loadingAvatar = false;
 
   @override
   void initState() {
     super.initState();
     _loadRecentEvents();
     _loadLastAction();
+    _loadAvatar();
+  }
+
+  Future<void> _loadAvatar() async {
+    try {
+      _loadingAvatar = true;
+      setState(() {});
+      _avatar = await _avatarService.getMyAvatar();
+    } catch (e) {
+      debugPrint('加载分身失败: $e');
+    } finally {
+      _loadingAvatar = false;
+      setState(() {});
+    }
   }
 
   Future<void> _loadRecentEvents() async {
@@ -147,7 +167,19 @@ class _HomePageState extends State<HomePage> {
           ),
           const SizedBox(height: 16),
           ElevatedButton.icon(
-            onPressed: () {},
+            onPressed: _avatar == null
+                ? null
+                : () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChatPage(
+                          avatarId: _avatar!.id,
+                          avatarName: _avatar!.name,
+                        ),
+                      ),
+                    );
+                  },
             icon: const Icon(Icons.chat_bubble_outline),
             label: const Text('与 TA 对话'),
             style: ElevatedButton.styleFrom(

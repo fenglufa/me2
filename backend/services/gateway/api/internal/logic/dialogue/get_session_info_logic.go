@@ -3,6 +3,7 @@ package dialogue
 import (
 	"context"
 
+	"github.com/me2/dialogue/rpc/dialogue_client"
 	"github.com/me2/gateway/api/internal/svc"
 	"github.com/me2/gateway/api/internal/types"
 
@@ -15,7 +16,6 @@ type GetSessionInfoLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// 获取会话详情
 func NewGetSessionInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetSessionInfoLogic {
 	return &GetSessionInfoLogic{
 		Logger: logx.WithContext(ctx),
@@ -24,8 +24,27 @@ func NewGetSessionInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ge
 	}
 }
 
-func (l *GetSessionInfoLogic) GetSessionInfo() (resp *types.GetSessionInfoResponse, err error) {
-	// todo: add your logic here and delete this line
+func (l *GetSessionInfoLogic) GetSessionInfo(req *types.GetSessionInfoRequest) (resp *types.GetSessionInfoResponse, err error) {
+	userID := l.ctx.Value("user_id").(int64)
 
-	return
+	rpcResp, err := l.svcCtx.DialogueRpc.GetSessionInfo(l.ctx, &dialogue_client.GetSessionInfoRequest{
+		SessionId: req.Id,
+		UserId:    userID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	s := rpcResp.Session
+	return &types.GetSessionInfoResponse{
+		Session: types.SessionInfo{
+			Id:          s.Id,
+			UserId:      s.UserId,
+			AvatarId:    s.AvatarId,
+			Title:       s.Title,
+			LastMessage: s.LastMessage,
+			CreatedAt:   s.CreatedAt,
+			UpdatedAt:   s.UpdatedAt,
+		},
+	}, nil
 }

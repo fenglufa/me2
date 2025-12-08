@@ -120,6 +120,10 @@ type CreateUserDiaryRequest struct {
 	Mood    string `json:"mood,optional"`
 }
 
+type DeleteSessionRequest struct {
+	Id int64 `path:"id"`
+}
+
 type DeleteSessionResponse struct {
 	Success bool `json:"success"`
 }
@@ -195,8 +199,9 @@ type GetMapRequest struct {
 }
 
 type GetMessagesRequest struct {
-	Page     int32 `form:"page,default=1"`
-	PageSize int32 `form:"page_size,default=50"`
+	SessionId int64 `path:"session_id"`
+	Page      int32 `form:"page,default=1"`
+	PageSize  int32 `form:"page_size,default=50"`
 }
 
 type GetMessagesResponse struct {
@@ -209,6 +214,10 @@ type GetRegionRequest struct {
 }
 
 type GetSceneRequest struct {
+	Id int64 `path:"id"`
+}
+
+type GetSessionInfoRequest struct {
 	Id int64 `path:"id"`
 }
 

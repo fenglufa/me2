@@ -62,6 +62,7 @@ func (l *ChatStreamLogic) ChatStream(in *dialogue.ChatStreamRequest, stream dial
 		"user_message":  in.Message,
 	}
 
+	l.Infof("Calling AI service: template=%s, user_id=%d, avatar_id=%d", "avatar_chat", in.UserId, in.AvatarId)
 	aiStream, err := l.svcCtx.AiRpc.ChatStream(l.ctx, &ai_client.ChatRequest{
 		PromptTemplate: "avatar_chat",
 		Variables:      variables,
@@ -69,19 +70,28 @@ func (l *ChatStreamLogic) ChatStream(in *dialogue.ChatStreamRequest, stream dial
 		AvatarId:       in.AvatarId,
 	})
 	if err != nil {
+		l.Errorf("AI service call failed: %v", err)
 		return err
 	}
+	l.Info("AI service call succeeded, starting to receive stream")
 
 	var fullResponse strings.Builder
+	chunkCount := 0
 
 	for {
+		l.Infof("Waiting for chunk %d from AI stream...", chunkCount)
 		resp, err := aiStream.Recv()
 		if err == io.EOF {
+			l.Infof("Received EOF from AI stream after %d chunks", chunkCount)
 			break
 		}
 		if err != nil {
+			l.Errorf("Error receiving from AI stream: %v", err)
 			return err
 		}
+
+		chunkCount++
+		l.Infof("Received chunk %d: content_len=%d, done=%v", chunkCount, len(resp.Content), resp.Done)
 
 		fullResponse.WriteString(resp.Content)
 
@@ -93,6 +103,7 @@ func (l *ChatStreamLogic) ChatStream(in *dialogue.ChatStreamRequest, stream dial
 		}
 
 		if resp.Done {
+			l.Infof("Stream marked as done after %d chunks", chunkCount)
 			break
 		}
 	}
