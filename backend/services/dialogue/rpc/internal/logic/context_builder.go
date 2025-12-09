@@ -32,7 +32,7 @@ func (b *ContextBuilder) BuildSystemPrompt(avatarID, sessionID int64) (string, e
 		return "", err
 	}
 
-	personality := b.formatPersonality(avatarResp.Avatar.Personality)
+	avatarInfo := b.formatAvatarInfo(avatarResp.Avatar)
 
 	recentEvents, err := b.getRecentEvents(avatarID)
 	if err != nil {
@@ -44,7 +44,7 @@ func (b *ContextBuilder) BuildSystemPrompt(avatarID, sessionID int64) (string, e
 		return "", err
 	}
 
-	prompt := fmt.Sprintf(`你是用户的AI分身,具有以下性格特征:
+	prompt := fmt.Sprintf(`你是用户的AI分身,具有以下基本信息:
 %s
 
 最近发生的事件:
@@ -53,40 +53,29 @@ func (b *ContextBuilder) BuildSystemPrompt(avatarID, sessionID int64) (string, e
 对话历史:
 %s
 
-请以分身的口吻回复用户,体现你的性格特点。回复要自然、简洁,不要过于正式。`,
-		personality, recentEvents, history)
+请以分身的口吻回复用户。回复要自然、简洁,不要过于正式。`,
+		avatarInfo, recentEvents, history)
 
 	return prompt, nil
 }
 
-func (b *ContextBuilder) formatPersonality(p *avatar_client.PersonalityInfo) string {
-	if p == nil {
-		return "暂无人格信息"
+func (b *ContextBuilder) formatAvatarInfo(avatar *avatar_client.AvatarInfo) string {
+	if avatar == nil {
+		return "暂无分身信息"
 	}
 
-	traits := []string{
-		fmt.Sprintf("情绪温度: %d/100 (%s)", p.Warmth, b.describeLevel(p.Warmth)),
-		fmt.Sprintf("冒险倾向: %d/100 (%s)", p.Adventurous, b.describeLevel(p.Adventurous)),
-		fmt.Sprintf("人际能量: %d/100 (%s)", p.Social, b.describeLevel(p.Social)),
-		fmt.Sprintf("创造性: %d/100 (%s)", p.Creative, b.describeLevel(p.Creative)),
-		fmt.Sprintf("情绪稳定性: %d/100 (%s)", p.Calm, b.describeLevel(p.Calm)),
-		fmt.Sprintf("生活动力: %d/100 (%s)", p.Energetic, b.describeLevel(p.Energetic)),
+	genderMap := map[int32]string{1: "男", 2: "女", 3: "其他"}
+	maritalMap := map[int32]string{1: "单身", 2: "恋爱中", 3: "已婚", 4: "其他"}
+
+	info := []string{
+		fmt.Sprintf("昵称: %s", avatar.Nickname),
+		fmt.Sprintf("性别: %s", genderMap[avatar.Gender]),
+		fmt.Sprintf("出生日期: %s", avatar.BirthDate),
+		fmt.Sprintf("职业: %s", avatar.Occupation),
+		fmt.Sprintf("婚姻状态: %s", maritalMap[avatar.MaritalStatus]),
 	}
 
-	return strings.Join(traits, "\n")
-}
-
-func (b *ContextBuilder) describeLevel(value int32) string {
-	if value >= 80 {
-		return "非常高"
-	} else if value >= 60 {
-		return "较高"
-	} else if value >= 40 {
-		return "中等"
-	} else if value >= 20 {
-		return "较低"
-	}
-	return "很低"
+	return strings.Join(info, "\n")
 }
 
 func (b *ContextBuilder) getRecentEvents(avatarID int64) (string, error) {

@@ -6,7 +6,7 @@
 
 - 会话管理(创建、查询、删除)
 - 流式对话(基于 gRPC Stream)
-- 上下文构建(人格 + 最近事件 + 对话历史)
+- 上下文构建(分身信息 + 最近事件 + 对话历史)
 - 消息历史记录
 - 自动生成会话标题
 
@@ -173,14 +173,14 @@ rpc DeleteSession(DeleteSessionRequest) returns (DeleteSessionResponse);
 
 对话服务会自动构建包含以下信息的上下文:
 
-1. **分身人格**: 从 Avatar Service 获取 6 维人格向量并转换为文字描述
+1. **分身信息**: 从 Avatar Service 获取分身基本信息（昵称、性别、出生日期、职业、婚姻状态）
 2. **最近事件**: 从 Event Service 获取最近 N 条事件
 3. **对话历史**: 从数据库获取当前会话的最近 N 条消息
 
 ### 流式对话流程
 
 1. 验证会话权限
-2. 构建系统 Prompt(人格 + 事件 + 历史)
+2. 构建系统 Prompt(分身信息 + 事件 + 历史)
 3. 保存用户消息
 4. 调用 AI Service 的 ChatStream 接口
 5. 流式返回 AI 响应
@@ -189,7 +189,7 @@ rpc DeleteSession(DeleteSessionRequest) returns (DeleteSessionResponse);
 
 ## 依赖服务
 
-- **Avatar Service**: 获取分身人格信息
+- **Avatar Service**: 获取分身基本信息
 - **Event Service**: 获取最近事件
 - **AI Service**: 调用 DeepSeek 生成对话响应
 - **MySQL**: 存储会话和消息
