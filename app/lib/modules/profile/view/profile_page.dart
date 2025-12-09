@@ -4,7 +4,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import '../../user/controller/user_controller.dart';
 import '../../diary/controller/diary_controller.dart';
-import '../../diary/model/diary_stats.dart';
 import '../../diary/view/diary_detail_page.dart';
 
 class ProfilePage extends ConsumerWidget {
@@ -13,7 +12,6 @@ class ProfilePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userInfoAsync = ref.watch(userInfoProvider);
-    final diaryStatsAsync = ref.watch(diaryStatsProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -24,12 +22,6 @@ class ProfilePage extends ConsumerWidget {
                 _buildHeader(context, userInfo.nickname, userInfo.avatarUrl),
                 const SizedBox(height: 16),
                 _buildSubscriptionCard(context, userInfo.subscriptionTier),
-                const SizedBox(height: 16),
-                diaryStatsAsync.when(
-                  data: (stats) => _buildDiaryStats(context, stats),
-                  loading: () => const SizedBox.shrink(),
-                  error: (_, __) => const SizedBox.shrink(),
-                ),
                 const SizedBox(height: 16),
                 _buildDiaryTabs(context, ref),
               ],
@@ -142,55 +134,6 @@ class ProfilePage extends ConsumerWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildDiaryStats(BuildContext context, DiaryStats stats) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildStatItem('总日记', stats.totalCount),
-          _buildStatItem('分身日记', stats.avatarCount),
-          _buildStatItem('我的日记', stats.userCount),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatItem(String label, int count) {
-    return Column(
-      children: [
-        Text(
-          count.toString(),
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey.shade600,
-          ),
-        ),
-      ],
     );
   }
 
@@ -368,7 +311,6 @@ class ProfilePage extends ConsumerWidget {
                 );
 
                 ref.invalidate(userDiariesProvider);
-                ref.invalidate(diaryStatsProvider);
 
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
