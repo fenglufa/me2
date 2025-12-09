@@ -1,0 +1,210 @@
+syntax = "proto3";
+
+package note;
+option go_package = "./note";
+
+// 笔记服务
+service NoteService {
+  // 创建笔记
+  rpc CreateNote(CreateNoteRequest) returns (CreateNoteResponse);
+
+  // 获取笔记列表
+  rpc GetNotes(GetNotesRequest) returns (GetNotesResponse);
+
+  // 获取笔记详情
+  rpc GetNoteDetail(GetNoteDetailRequest) returns (GetNoteDetailResponse);
+
+  // 更新笔记
+  rpc UpdateNote(UpdateNoteRequest) returns (UpdateNoteResponse);
+
+  // 删除笔记
+  rpc DeleteNote(DeleteNoteRequest) returns (DeleteNoteResponse);
+
+  // 搜索笔记（用于对话集成）
+  rpc SearchNotes(SearchNotesRequest) returns (SearchNotesResponse);
+
+  // 获取 TODO 列表
+  rpc GetTodos(GetTodosRequest) returns (GetTodosResponse);
+
+  // 更新 TODO 状态
+  rpc UpdateTodoStatus(UpdateTodoStatusRequest) returns (UpdateTodoStatusResponse);
+
+  // 获取记账列表
+  rpc GetExpenses(GetExpensesRequest) returns (GetExpensesResponse);
+
+  // 获取记账统计
+  rpc GetExpenseStats(GetExpenseStatsRequest) returns (GetExpenseStatsResponse);
+}
+
+// ==================== CreateNote ====================
+message CreateNoteRequest {
+  int64 user_id = 1;
+  int64 avatar_id = 2;  // 可选，关联分身
+  string raw_text = 3;
+}
+
+message CreateNoteResponse {
+  int64 note_id = 1;
+  string ai_summary = 2;
+  repeated string types = 3;
+  EmotionData emotion_data = 4;
+}
+
+// ==================== GetNotes ====================
+message GetNotesRequest {
+  int64 user_id = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+  repeated string types = 4;  // 类型过滤
+}
+
+message GetNotesResponse {
+  repeated NoteInfo notes = 1;
+  int64 total = 2;
+}
+
+// ==================== GetNoteDetail ====================
+message GetNoteDetailRequest {
+  int64 note_id = 1;
+  int64 user_id = 2;
+}
+
+message GetNoteDetailResponse {
+  NoteInfo note = 1;
+  repeated TodoInfo todos = 2;
+  repeated ExpenseInfo expenses = 3;
+}
+
+// ==================== UpdateNote ====================
+message UpdateNoteRequest {
+  int64 note_id = 1;
+  int64 user_id = 2;
+  string raw_text = 3;
+}
+
+message UpdateNoteResponse {
+  bool success = 1;
+  string ai_summary = 2;
+  repeated string types = 3;
+}
+
+// ==================== DeleteNote ====================
+message DeleteNoteRequest {
+  int64 note_id = 1;
+  int64 user_id = 2;
+}
+
+message DeleteNoteResponse {
+  bool success = 1;
+}
+
+// ==================== SearchNotes ====================
+message SearchNotesRequest {
+  int64 user_id = 1;
+  string query = 2;
+  repeated string types = 3;
+  string date_range = 4;  // today, yesterday, last_week, last_month
+  int32 limit = 5;
+}
+
+message SearchNotesResponse {
+  repeated NoteInfo notes = 1;
+}
+
+// ==================== GetTodos ====================
+message GetTodosRequest {
+  int64 user_id = 1;
+  int32 status = 2;  // -1:全部 0:未完成 1:已完成
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+message GetTodosResponse {
+  repeated TodoInfo todos = 1;
+  int64 total = 2;
+}
+
+// ==================== UpdateTodoStatus ====================
+message UpdateTodoStatusRequest {
+  int64 todo_id = 1;
+  int64 user_id = 2;
+  int32 status = 3;  // 0:未完成 1:已完成
+}
+
+message UpdateTodoStatusResponse {
+  bool success = 1;
+}
+
+// ==================== GetExpenses ====================
+message GetExpensesRequest {
+  int64 user_id = 1;
+  string start_date = 2;  // YYYY-MM-DD
+  string end_date = 3;    // YYYY-MM-DD
+  string category = 4;    // 分类过滤
+  int32 page = 5;
+  int32 page_size = 6;
+}
+
+message GetExpensesResponse {
+  repeated ExpenseInfo expenses = 1;
+  int64 total = 2;
+  double total_amount = 3;
+}
+
+// ==================== GetExpenseStats ====================
+message GetExpenseStatsRequest {
+  int64 user_id = 1;
+  string start_date = 2;
+  string end_date = 3;
+}
+
+message GetExpenseStatsResponse {
+  double total_amount = 1;
+  map<string, double> category_stats = 2;  // 分类统计
+  repeated DailyExpense daily_expenses = 3;  // 每日支出
+}
+
+// ==================== 数据结构 ====================
+
+message NoteInfo {
+  int64 id = 1;
+  int64 user_id = 2;
+  int64 avatar_id = 3;
+  string raw_text = 4;
+  string ai_summary = 5;
+  repeated string types = 6;
+  EmotionData emotion_data = 7;
+  string created_at = 8;
+  string updated_at = 9;
+}
+
+message EmotionData {
+  string primary = 1;  // 主要情绪：happy, sad, angry, anxious, calm
+  double score = 2;    // 强度 0-1
+}
+
+message TodoInfo {
+  int64 id = 1;
+  int64 note_id = 2;
+  int64 user_id = 3;
+  string title = 4;
+  string due_date = 5;
+  int32 status = 6;
+  string created_at = 7;
+  string completed_at = 8;
+}
+
+message ExpenseInfo {
+  int64 id = 1;
+  int64 note_id = 2;
+  int64 user_id = 3;
+  string item = 4;
+  double amount = 5;
+  string category = 6;
+  string created_at = 7;
+}
+
+message DailyExpense {
+  string date = 1;
+  double amount = 2;
+}

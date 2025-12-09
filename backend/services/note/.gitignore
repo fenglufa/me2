@@ -1,0 +1,6 @@
+bin/
+logs/
+etc/
+rpc/etc/
+.env
+etc/
