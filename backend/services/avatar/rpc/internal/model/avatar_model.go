@@ -9,24 +9,17 @@ import (
 )
 
 type Avatar struct {
-	Id              int64     `db:"id"`
-	AvatarId        int64     `db:"avatar_id"`
-	UserId          int64     `db:"user_id"`
-	Nickname        string    `db:"nickname"`
-	AvatarUrl       string    `db:"avatar_url"`
-	Gender          int32     `db:"gender"`
-	BirthDate       string    `db:"birth_date"`
-	Occupation      string    `db:"occupation"`
-	MaritalStatus   int32     `db:"marital_status"`
-	Warmth          int32     `db:"warmth"`
-	Adventurous     int32     `db:"adventurous"`
-	Social          int32     `db:"social"`
-	Creative        int32     `db:"creative"`
-	Calm            int32     `db:"calm"`
-	Energetic       int32     `db:"energetic"`
-	PersonalityType string    `db:"personality_type"`
-	CreatedAt       time.Time `db:"created_at"`
-	UpdatedAt       time.Time `db:"updated_at"`
+	Id            int64     `db:"id"`
+	AvatarId      int64     `db:"avatar_id"`
+	UserId        int64     `db:"user_id"`
+	Nickname      string    `db:"nickname"`
+	AvatarUrl     string    `db:"avatar_url"`
+	Gender        int32     `db:"gender"`
+	BirthDate     string    `db:"birth_date"`
+	Occupation    string    `db:"occupation"`
+	MaritalStatus int32     `db:"marital_status"`
+	CreatedAt     time.Time `db:"created_at"`
+	UpdatedAt     time.Time `db:"updated_at"`
 }
 
 type AvatarModel struct {
@@ -38,18 +31,16 @@ func NewAvatarModel(conn sqlx.SqlConn) *AvatarModel {
 }
 
 func (m *AvatarModel) Insert(avatar *Avatar) (sql.Result, error) {
-	query := `INSERT INTO avatars (avatar_id, user_id, nickname, avatar_url, gender, birth_date, occupation,
-		marital_status, warmth, adventurous, social, creative, calm, energetic, personality_type)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	query := `INSERT INTO avatars (avatar_id, user_id, nickname, avatar_url, gender, birth_date, occupation, marital_status)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
 	return m.conn.Exec(query, avatar.AvatarId, avatar.UserId, avatar.Nickname, avatar.AvatarUrl, avatar.Gender,
-		avatar.BirthDate, avatar.Occupation, avatar.MaritalStatus, avatar.Warmth, avatar.Adventurous,
-		avatar.Social, avatar.Creative, avatar.Calm, avatar.Energetic, avatar.PersonalityType)
+		avatar.BirthDate, avatar.Occupation, avatar.MaritalStatus)
 }
 
 func (m *AvatarModel) FindByUserId(userId int64) (*Avatar, error) {
 	var avatar Avatar
 	query := `SELECT id, avatar_id, user_id, nickname, avatar_url, gender, DATE_FORMAT(birth_date, '%Y-%m-%d') as birth_date, occupation,
-		marital_status, warmth, adventurous, social, creative, calm, energetic, personality_type, created_at, updated_at
+		marital_status, created_at, updated_at
 		FROM avatars WHERE user_id = ?`
 	err := m.conn.QueryRow(&avatar, query, userId)
 	if err != nil {
@@ -61,7 +52,7 @@ func (m *AvatarModel) FindByUserId(userId int64) (*Avatar, error) {
 func (m *AvatarModel) FindByAvatarId(avatarId int64) (*Avatar, error) {
 	var avatar Avatar
 	query := `SELECT id, avatar_id, user_id, nickname, avatar_url, gender, DATE_FORMAT(birth_date, '%Y-%m-%d') as birth_date, occupation,
-		marital_status, warmth, adventurous, social, creative, calm, energetic, personality_type, created_at, updated_at
+		marital_status, created_at, updated_at
 		FROM avatars WHERE avatar_id = ?`
 	err := m.conn.QueryRow(&avatar, query, avatarId)
 	if err != nil {
@@ -106,11 +97,5 @@ func (m *AvatarModel) UpdateProfile(avatarId int64, nickname, avatarUrl string, 
 	args = append(args, avatarId)
 	query := "UPDATE avatars SET " + strings.Join(updates, ", ") + " WHERE avatar_id = ?"
 	_, err := m.conn.Exec(query, args...)
-	return err
-}
-
-func (m *AvatarModel) UpdatePersonality(avatarId int64, warmth, adventurous, social, creative, calm, energetic int32, personalityType string) error {
-	query := `UPDATE avatars SET warmth = ?, adventurous = ?, social = ?, creative = ?, calm = ?, energetic = ?, personality_type = ? WHERE avatar_id = ?`
-	_, err := m.conn.Exec(query, warmth, adventurous, social, creative, calm, energetic, personalityType, avatarId)
 	return err
 }

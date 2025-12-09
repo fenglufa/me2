@@ -22,9 +22,6 @@ service Avatar {
 
   // 完成头像上传
   rpc CompleteAvatarUpload(CompleteAvatarUploadRequest) returns (CompleteAvatarUploadResponse);
-
-  // 更新人格特征（由事件触发）
-  rpc UpdatePersonality(UpdatePersonalityRequest) returns (UpdatePersonalityResponse);
 }
 
 // 创建分身请求
@@ -41,7 +38,6 @@ message CreateAvatarRequest {
 // 创建分身响应
 message CreateAvatarResponse {
   int64 avatar_id = 1;
-  PersonalityInfo personality = 2;  // 生成的人格信息
 }
 
 // 获取我的分身请求
@@ -122,34 +118,6 @@ message AvatarInfo {
   string birth_date = 6;
   string occupation = 7;
   int32 marital_status = 8;
-  PersonalityInfo personality = 9;
   int64 created_at = 10;
   int64 updated_at = 11;
-  string personality_type = 12;         // 人格类型代码：comforter/explorer/mentor等
-  string personality_type_name = 13;    // 人格类型中文名称
-  string personality_type_description = 14; // 人格类型描述
-}
-
-// 人格信息（6维）
-message PersonalityInfo {
-  int32 warmth = 1;            // 情绪温度 0-100 (温暖↔冷静)
-  int32 adventurous = 2;       // 冒险倾向 0-100 (冒险↔安全)
-  int32 social = 3;            // 人际能量 0-100 (社交↔独处)
-  int32 creative = 4;          // 创造性 0-100 (创造↔结构)
-  int32 calm = 5;              // 情绪稳定性 0-100 (沉稳↔敏感)
-  int32 energetic = 6;         // 生活动力 0-100 (活力↔温和)
-}
-
-// 更新人格特征请求
-message UpdatePersonalityRequest {
-  int64 avatar_id = 1;         // 分身ID
-  int64 event_id = 2;          // 触发事件ID
-  string personality_changes = 3; // 人格变化 JSON: {"warmth":2,"adventurous":3,...}
-}
-
-// 更新人格特征响应
-message UpdatePersonalityResponse {
-  bool success = 1;
-  PersonalityInfo before = 2;   // 变化前的人格
-  PersonalityInfo after = 3;    // 变化后的人格
 }

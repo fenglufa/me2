@@ -12,14 +12,13 @@ import (
 )
 
 type ServiceContext struct {
-	Config                  config.Config
-	DB                      sqlx.SqlConn
-	OssRpc                  oss_client.Oss
-	SchedulerRpc            scheduler_client.Scheduler
-	ActionRpc               action_client.Action
-	IDGen                   *idgen.Snowflake
-	AvatarModel             *model.AvatarModel
-	PersonalityHistoryModel *model.PersonalityHistoryModel
+	Config       config.Config
+	DB           sqlx.SqlConn
+	OssRpc       oss_client.Oss
+	SchedulerRpc scheduler_client.Scheduler
+	ActionRpc    action_client.Action
+	IDGen        *idgen.Snowflake
+	AvatarModel  *model.AvatarModel
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -34,13 +33,12 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	}
 
 	return &ServiceContext{
-		Config:                  c,
-		DB:                      db,
-		OssRpc:                  ossRpc,
-		SchedulerRpc:            schedulerRpc,
-		ActionRpc:               actionRpc,
-		IDGen:                   idGen,
-		AvatarModel:             model.NewAvatarModel(db),
-		PersonalityHistoryModel: model.NewPersonalityHistoryModel(db),
+		Config:       c,
+		DB:           db,
+		OssRpc:       ossRpc,
+		SchedulerRpc: schedulerRpc,
+		ActionRpc:    actionRpc,
+		IDGen:        idGen,
+		AvatarModel:  model.NewAvatarModel(db),
 	}
 }

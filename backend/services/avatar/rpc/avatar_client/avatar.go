@@ -25,11 +25,8 @@ type (
 	GetAvatarUploadTokenResponse = avatar.GetAvatarUploadTokenResponse
 	GetMyAvatarRequest           = avatar.GetMyAvatarRequest
 	GetMyAvatarResponse          = avatar.GetMyAvatarResponse
-	PersonalityInfo              = avatar.PersonalityInfo
 	UpdateAvatarProfileRequest   = avatar.UpdateAvatarProfileRequest
 	UpdateAvatarProfileResponse  = avatar.UpdateAvatarProfileResponse
-	UpdatePersonalityRequest     = avatar.UpdatePersonalityRequest
-	UpdatePersonalityResponse    = avatar.UpdatePersonalityResponse
 
 	Avatar interface {
 		// 创建分身
@@ -44,8 +41,6 @@ type (
 		GetAvatarUploadToken(ctx context.Context, in *GetAvatarUploadTokenRequest, opts ...grpc.CallOption) (*GetAvatarUploadTokenResponse, error)
 		// 完成头像上传
 		CompleteAvatarUpload(ctx context.Context, in *CompleteAvatarUploadRequest, opts ...grpc.CallOption) (*CompleteAvatarUploadResponse, error)
-		// 更新人格特征（由事件触发）
-		UpdatePersonality(ctx context.Context, in *UpdatePersonalityRequest, opts ...grpc.CallOption) (*UpdatePersonalityResponse, error)
 	}
 
 	defaultAvatar struct {
@@ -93,10 +88,4 @@ func (m *defaultAvatar) GetAvatarUploadToken(ctx context.Context, in *GetAvatarU
 func (m *defaultAvatar) CompleteAvatarUpload(ctx context.Context, in *CompleteAvatarUploadRequest, opts ...grpc.CallOption) (*CompleteAvatarUploadResponse, error) {
 	client := avatar.NewAvatarClient(m.cli.Conn())
 	return client.CompleteAvatarUpload(ctx, in, opts...)
-}
-
-// 更新人格特征（由事件触发）
-func (m *defaultAvatar) UpdatePersonality(ctx context.Context, in *UpdatePersonalityRequest, opts ...grpc.CallOption) (*UpdatePersonalityResponse, error) {
-	client := avatar.NewAvatarClient(m.cli.Conn())
-	return client.UpdatePersonality(ctx, in, opts...)
 }

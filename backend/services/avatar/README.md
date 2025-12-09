@@ -1,6 +1,6 @@
 # Avatar Service
 
-分身服务，提供分身创建、信息管理、人格系统和头像上传功能。
+分身服务，提供分身创建、信息管理和头像上传功能。
 
 ## 目录
 
@@ -16,18 +16,16 @@
   - [UpdateAvatarProfile - 更新分身资料](#updateavatarprofile---更新分身资料)
   - [GetAvatarUploadToken - 获取头像上传凭证](#getavataruploadtoken---获取头像上传凭证)
   - [CompleteAvatarUpload - 完成头像上传](#completeavatarupload---完成头像上传)
-- [人格生成系统](#人格生成系统)
-- [人格类型系统](#人格类型系统)
 - [头像上传流程](#头像上传流程)
 - [依赖服务](#依赖服务)
 - [注意事项](#注意事项)
 
 ## 功能
 
-- 创建分身 (CreateAvatar) - 收集用户信息并自动生成 6 维人格
+- 创建分身 (CreateAvatar) - 收集用户信息并创建分身
 - 获取我的分身 (GetMyAvatar) - 查询用户是否已创建分身
 - 获取分身详情 (GetAvatarInfo) - 获取完整的分身信息
-- 更新分身资料 (UpdateAvatarProfile) - 更新昵称、头像
+- 更新分身资料 (UpdateAvatarProfile) - 更新昵称、头像等基本信息
 - 获取头像上传凭证 (GetAvatarUploadToken) - 调用 OSS 服务获取上传凭证
 - 完成头像上传 (CompleteAvatarUpload) - 完成上传并更新分身头像
 
@@ -37,7 +35,6 @@
 - MySQL (分身数据存储)
 - Etcd (服务注册与发现)
 - 雪花算法 (生成 10 位分身 ID)
-- 基于人口统计学的人格生成算法
 
 ## 配置
 
@@ -85,15 +82,6 @@ CREATE TABLE avatars (
     birth_date DATE NOT NULL,
     occupation VARCHAR(50) DEFAULT '',
     marital_status TINYINT DEFAULT 1,
-
-    -- 6维人格
-    warmth TINYINT DEFAULT 50,
-    adventurous TINYINT DEFAULT 50,
-    social TINYINT DEFAULT 50,
-    creative TINYINT DEFAULT 50,
-    calm TINYINT DEFAULT 50,
-    energetic TINYINT DEFAULT 50,
-    personality_type VARCHAR(50) DEFAULT '' COMMENT '人格类型',
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -148,7 +136,6 @@ message CreateAvatarRequest {
 ```protobuf
 message CreateAvatarResponse {
   int64 avatar_id = 1;
-  PersonalityInfo personality = 2;  // 生成的人格信息
 }
 ```
 
@@ -246,172 +233,6 @@ message CompleteAvatarUploadResponse {
 }
 ```
 
-## 人格生成系统
-
-创建分身时，系统会基于用户提供的人口统计学信息（年龄、职业、婚姻状态、性别）自动生成 6 维人格：
-
-### 6 维人格
-
-1. **情绪温度 (Warmth)**: 0-100，温暖 ↔ 冷静
-2. **冒险倾向 (Adventurous)**: 0-100，冒险 ↔ 安全
-3. **人际能量 (Social)**: 0-100，社交 ↔ 独处
-4. **创造性 (Creative)**: 0-100，创造 ↔ 结构
-5. **情绪稳定性 (Calm)**: 0-100，沉稳 ↔ 敏感
-6. **生活动力 (Energetic)**: 0-100，活力 ↔ 温和
-
-### 生成规则
-
-所有维度从 50（中性）开始，然后根据以下因素调整：
-
-**年龄影响**:
-- < 25 岁: Adventurous +15, Energetic +10, Social +10
-- 25-35 岁: Adventurous +5, Energetic +5
-- 35-50 岁: Calm +10, Warmth +5
-- > 50 岁: Calm +15, Warmth +10, Adventurous -10
-
-**职业影响**:
-- 创意类: Creative +20, Adventurous +10
-- 技术类: Creative +10, Calm +10
-- 商务类: Social +15, Energetic +10
-- 教育类: Warmth +15, Calm +10
-- 医疗类: Warmth +15, Calm +15
-
-**婚姻状态影响**:
-- 单身: Adventurous +5, Social +5
-- 恋爱中: Warmth +10, Social +5
-- 已婚: Warmth +10, Calm +10
-
-**性别影响**（轻微）:
-- 女性: Warmth +5
-- 男性: Adventurous +5
-
-所有值最终会被规范化到 0-100 范围内。
-
-## 人格类型系统
-
-在生成 6 维人格的基础上，系统会自动计算并分配一个**人格类型标签**，用于快速概括分身的人格特征，方便用户分享和传播。
-
-### 8 种人格类型
-
-| 类型代码 | 中文名称 | 描述 | 判定条件 |
-|---------|---------|------|---------|
-| `comforter` | 温柔治愈师 | 温暖体贴，善于倾听和安慰他人 | 高温暖度 + 高平静度 |
-| `explorer` | 调皮冒险家 | 充满好奇，勇于探索未知世界 | 高冒险性 + 高活力值 |
-| `mentor` | 智慧导师 | 沉稳睿智，善于引导和启发他人 | 高平静度 + 高创造力 |
-| `poet` | 浪漫诗人 | 感性细腻，富有艺术气息 | 高创造力 + 低平静度（敏感） |
-| `tsundere` | 傲娇小鬼 | 外冷内热，个性鲜明 | 低温暖度 + 高活力值 |
-| `companion` | 暖心伙伴 | 热情友善，乐于陪伴和分享 | 高社交性 + 高温暖度 |
-| `creator` | 疯狂创客 | 充满创意，执行力强 | 高创造力 + 高活力值 |
-| `socializer` | 社交达人 | 外向开朗，擅长人际交往 | 高社交性 + 高冒险性 |
-
-### 数据库字段
-
-添加 `personality_type` 字段到现有数据库：
-
-```sql
-ALTER TABLE avatars
-ADD COLUMN personality_type VARCHAR(50) DEFAULT ''
-COMMENT '人格类型：comforter/explorer/mentor/poet/tsundere/companion/creator/socializer'
-AFTER energetic;
-```
-
-### 计算逻辑
-
-人格类型根据 6 维人格值自动计算，使用**加权评分系统**：
-
-```go
-func CalculatePersonalityType(warmth, adventurous, social, creative, calm, energetic int32) string {
-    const (
-        HIGH   = 60  // 高值阈值
-        MEDIUM = 40  // 中值阈值
-        LOW    = 40  // 低值阈值
-    )
-
-    scores := make(map[string]float64)
-
-    // 温柔治愈师：温暖度高 + 平静度高
-    if warmth >= HIGH {
-        scores["comforter"] += float64(warmth) * 1.5
-    }
-    if calm >= HIGH {
-        scores["comforter"] += float64(calm) * 1.2
-    }
-
-    // 调皮冒险家：冒险性高 + 活力值高
-    if adventurous >= HIGH {
-        scores["explorer"] += float64(adventurous) * 1.5
-    }
-    if energetic >= HIGH {
-        scores["explorer"] += float64(energetic) * 1.2
-    }
-
-    // ... 其他 6 种类型的计算规则
-
-    // 返回得分最高的类型
-    return maxScoreType(scores)
-}
-```
-
-### 自动触发时机
-
-人格类型会在以下情况自动计算和更新：
-
-1. **创建分身时** (`CreateAvatar`)：
-   - 首先生成 6 维人格
-   - 然后根据人格值自动计算人格类型
-   - 一并存入数据库
-
-2. **更新人格值时** (`UpdatePersonality`)：
-   - 由事件系统触发人格值变化
-   - 重新计算人格类型
-   - 同时更新人格值和类型
-
-### API 返回字段
-
-人格类型会通过 `AvatarInfo` 返回给客户端：
-
-```protobuf
-message AvatarInfo {
-  // ... 其他字段 ...
-  string personality_type = 12;               // 类型代码（如 "comforter"）
-  string personality_type_name = 13;          // 中文名称（如 "温柔治愈师"）
-  string personality_type_description = 14;   // 描述文本
-}
-```
-
-### 实现文件
-
-- **算法实现**: `rpc/internal/logic/personality_calculator.go`
-  - `CalculatePersonalityType()`: 计算人格类型
-  - `GetPersonalityTypeName()`: 获取中文名称
-  - `GetPersonalityTypeDescription()`: 获取描述
-
-- **创建时计算**: `rpc/internal/logic/create_avatar_logic.go`
-- **更新时重新计算**: `rpc/internal/logic/update_personality_logic.go`
-- **数据模型**: `rpc/internal/model/avatar_model.go`
-
-### 设计理念
-
-人格类型系统的设计遵循以下原则：
-
-1. **简化标签，非完整系统**：只是基于 6 维人格的简单分类，不是复杂的人格测试系统
-2. **自动计算**：无需用户手动选择，完全基于人格值自动判定
-3. **动态更新**：随着人格值变化而自动重新分类，反映分身成长
-4. **便于传播**：提供有趣的中文名称（如"温柔治愈师"），方便用户分享和讨论
-
-## 头像上传流程
-
-分身可以通过调用头像上传接口更新头像。整个流程采用**两阶段上传模式**：
-
-### 1. 获取上传凭证
-
-客户端调用 `GetAvatarUploadToken` 获取上传所需的凭证：
-
-```bash
-grpcurl -plaintext -proto avatar.proto \
-  -d '{"avatar_id": 123, "file_name": "avatar.jpg"}' \
-  127.0.0.1:8004 avatar.Avatar/GetAvatarUploadToken
-```
 
 ### 2. 客户端直接上传到 OSS
 
@@ -509,11 +330,7 @@ go func() {
 - 每个用户只能创建一个分身（user_id 唯一约束）
 - 分身 ID (avatar_id) 使用雪花算法生成 10 位数字，与用户 ID (9 位) 区分
 - 机器 ID (MachineID) 需要在配置文件中设置，范围 0-1023，确保分布式环境下 ID 唯一性
-- 分身创建时会自动生成基于人口统计学的 6 维人格
-- 人格值范围为 0-100，所有维度从 50 开始调整
-- 系统会根据 6 维人格自动计算人格类型（8 种类型之一），并在人格值更新时重新计算
 - 头像上传流程：
   1. 客户端调用 GetAvatarUploadToken 获取上传凭证
   2. 客户端直接上传文件到 OSS
   3. 客户端调用 CompleteAvatarUpload 完成上传并更新数据库
-- 当前 MVP 版本不包含成长系统和关系系统

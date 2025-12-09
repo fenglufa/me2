@@ -8,7 +8,6 @@ import (
 	"github.com/me2/action/rpc/action_client"
 	"github.com/me2/avatar/rpc/avatar"
 	"github.com/me2/avatar/rpc/internal/model"
-	"github.com/me2/avatar/rpc/internal/personality"
 	"github.com/me2/avatar/rpc/internal/svc"
 	"github.com/me2/scheduler/rpc/scheduler"
 
@@ -47,29 +46,16 @@ func (l *CreateAvatarLogic) CreateAvatar(in *avatar.CreateAvatarRequest) (*avata
 	// 生成分身ID
 	avatarId := l.svcCtx.IDGen.NextID()
 
-	// 生成人格
-	p := personality.GeneratePersonality(in.Gender, in.BirthDate, in.Occupation, in.MaritalStatus)
-
-	// 计算人格类型
-	personalityType := CalculatePersonalityType(p.Warmth, p.Adventurous, p.Social, p.Creative, p.Calm, p.Energetic)
-
 	// 创建分身
 	av := &model.Avatar{
-		AvatarId:        avatarId,
-		UserId:          in.UserId,
-		Nickname:        in.Nickname,
-		AvatarUrl:       in.AvatarUrl,
-		Gender:          in.Gender,
-		BirthDate:       in.BirthDate,
-		Occupation:      in.Occupation,
-		MaritalStatus:   in.MaritalStatus,
-		Warmth:          p.Warmth,
-		Adventurous:     p.Adventurous,
-		Social:          p.Social,
-		Creative:        p.Creative,
-		Calm:            p.Calm,
-		Energetic:       p.Energetic,
-		PersonalityType: personalityType,
+		AvatarId:      avatarId,
+		UserId:        in.UserId,
+		Nickname:      in.Nickname,
+		AvatarUrl:     in.AvatarUrl,
+		Gender:        in.Gender,
+		BirthDate:     in.BirthDate,
+		Occupation:    in.Occupation,
+		MaritalStatus: in.MaritalStatus,
 	}
 
 	_, err = l.svcCtx.AvatarModel.Insert(av)
@@ -106,13 +92,5 @@ func (l *CreateAvatarLogic) CreateAvatar(in *avatar.CreateAvatarRequest) (*avata
 
 	return &avatar.CreateAvatarResponse{
 		AvatarId: avatarId,
-		Personality: &avatar.PersonalityInfo{
-			Warmth:      p.Warmth,
-			Adventurous: p.Adventurous,
-			Social:      p.Social,
-			Creative:    p.Creative,
-			Calm:        p.Calm,
-			Energetic:   p.Energetic,
-		},
 	}, nil
 }
