@@ -40,16 +40,14 @@ func (l *CreateAvatarLogic) CreateAvatar(req *types.CreateAvatarRequest) (resp *
 	}
 
 	return &types.AvatarResponse{
-		Id:          rpcResp.AvatarId,
-		UserId:      userID,
-		Name:        req.Name,
-		AvatarUrl:   req.AvatarUrl,
-		Warmth:      float64(rpcResp.Personality.Warmth),
-		Adventurous: float64(rpcResp.Personality.Adventurous),
-		Social:      float64(rpcResp.Personality.Social),
-		Creative:    float64(rpcResp.Personality.Creative),
-		Calm:        float64(rpcResp.Personality.Calm),
-		Energetic:   float64(rpcResp.Personality.Energetic),
-		CreatedAt:   0, // 新创建的分身，使用当前时间戳
+		Id:            rpcResp.AvatarId,
+		UserId:        userID,
+		Name:          req.Name,
+		AvatarUrl:     req.AvatarUrl,
+		Gender:        req.Gender,
+		BirthDate:     req.BirthDate,
+		Occupation:    req.Occupation,
+		MaritalStatus: req.MaritalStatus,
+		CreatedAt:     0,
 	}, nil
 }

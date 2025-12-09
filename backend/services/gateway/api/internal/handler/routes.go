@@ -63,12 +63,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: avatar.UpdateAvatarHandler(serverCtx),
 				},
 				{
-					// 更新分身性格
-					Method:  http.MethodPut,
-					Path:    "/:id/personality",
-					Handler: avatar.UpdatePersonalityHandler(serverCtx),
-				},
-				{
 					// 完成分身头像上传
 					Method:  http.MethodPost,
 					Path:    "/avatar-complete",
