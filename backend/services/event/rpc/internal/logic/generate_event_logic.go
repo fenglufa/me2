@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"time"
 
@@ -96,11 +95,6 @@ func (l *GenerateEventLogic) GenerateEvent(in *event.GenerateEventRequest) (*eve
 			"scene_name":        sceneInfo.Scene.Name,
 			"scene_description": sceneInfo.Scene.Description,
 			"action_type":       in.ActionType,
-			"warmth":            fmt.Sprintf("%d", avatarInfo.Avatar.Personality.Warmth),
-			"adventurous":       fmt.Sprintf("%d", avatarInfo.Avatar.Personality.Adventurous),
-			"social":            fmt.Sprintf("%d", avatarInfo.Avatar.Personality.Social),
-			"creative":          fmt.Sprintf("%d", avatarInfo.Avatar.Personality.Creative),
-			"calm":              fmt.Sprintf("%d", avatarInfo.Avatar.Personality.Calm),
 		},
 		AvatarId: in.AvatarId,
 	})
@@ -125,16 +119,6 @@ func (l *GenerateEventLogic) GenerateEvent(in *event.GenerateEventRequest) (*eve
 		OccurredAt:  time.Now(),
 	}
 
-	// 设置人格影响
-	if selectedTemplate.PersonalityImpact.Valid && selectedTemplate.PersonalityImpact.String != "" {
-		eventHistory.PersonalityChanges = sql.NullString{
-			String: selectedTemplate.PersonalityImpact.String,
-			Valid:  true,
-		}
-	} else {
-		eventHistory.PersonalityChanges = sql.NullString{Valid: false}
-	}
-
 	result, err := l.svcCtx.EventHistoryModel.Insert(eventHistory)
 	if err != nil {
 		l.Errorf("保存事件历史失败: %v", err)
@@ -145,25 +129,6 @@ func (l *GenerateEventLogic) GenerateEvent(in *event.GenerateEventRequest) (*eve
 	if err != nil {
 		l.Errorf("获取事件ID失败: %v", err)
 		return nil, fmt.Errorf("获取事件ID失败")
-	}
-
-	// 8. 调用 Avatar Service 更新人格（失败不影响事件生成）
-	if eventHistory.PersonalityChanges.Valid {
-		// 创建独立的 context，设置 5 秒超时
-		updateCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-
-		updateResp, err := l.svcCtx.AvatarRpc.UpdatePersonality(updateCtx, &avatar_client.UpdatePersonalityRequest{
-			AvatarId:           in.AvatarId,
-			EventId:            eventId,
-			PersonalityChanges: eventHistory.PersonalityChanges.String,
-		})
-		if err != nil {
-			l.Errorf("更新人格失败（不影响事件生成）: %v", err)
-		} else {
-			l.Infof("人格更新成功 (avatar_id=%d, event_id=%d), 变化前: %+v, 变化后: %+v",
-				in.AvatarId, eventId, updateResp.Before, updateResp.After)
-		}
 	}
 
 	l.Infof("成功生成事件 (event_id=%d, avatar_id=%d, type=%s, scene=%s)",

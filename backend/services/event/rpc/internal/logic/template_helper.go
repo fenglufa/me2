@@ -59,12 +59,6 @@ func BuildTemplateVariables(avatarInfo *avatar.AvatarInfo, sceneName string) map
 	return map[string]interface{}{
 		"avatar_name": avatarInfo.Nickname,
 		"scene_name":  sceneName,
-		"warmth":      avatarInfo.Personality.Warmth,
-		"adventurous": avatarInfo.Personality.Adventurous,
-		"social":      avatarInfo.Personality.Social,
-		"creative":    avatarInfo.Personality.Creative,
-		"calm":        avatarInfo.Personality.Calm,
-		"energetic":   avatarInfo.Personality.Energetic,
 	}
 }
 
