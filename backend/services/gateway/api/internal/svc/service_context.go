@@ -10,6 +10,7 @@ import (
 	"github.com/me2/event/rpc/event_client"
 	"github.com/me2/gateway/api/internal/config"
 	"github.com/me2/gateway/api/internal/middleware"
+	"github.com/me2/note/rpc/noteservice"
 	"github.com/me2/user/rpc/user_client"
 	"github.com/me2/world/rpc/world_client"
 	"github.com/zeromicro/go-zero/zrpc"
@@ -25,6 +26,7 @@ type ServiceContext struct {
 	ActionRpc   action_client.Action
 	DiaryRpc    diary_client.Diary
 	DialogueRpc dialogue_client.Dialogue
+	NoteRpc     noteservice.NoteService
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -38,5 +40,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		ActionRpc:   action_client.NewAction(zrpc.MustNewClient(c.ActionRpc)),
 		DiaryRpc:    diary_client.NewDiary(zrpc.MustNewClient(c.DiaryRpc)),
 		DialogueRpc: dialogue_client.NewDialogue(zrpc.MustNewClient(c.DialogueRpc)),
+		NoteRpc:     noteservice.NewNoteService(zrpc.MustNewClient(c.NoteRpc)),
 	}
 }

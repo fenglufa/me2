@@ -1,0 +1,232 @@
+syntax = "v1"
+
+type (
+	// 情绪数据
+	EmotionData {
+		Primary string  `json:"primary"`
+		Score   float64 `json:"score"`
+	}
+
+	// 笔记响应
+	NoteResponse {
+		Id          int64       `json:"id"`
+		UserId      int64       `json:"user_id"`
+		AvatarId    int64       `json:"avatar_id,optional"`
+		RawText     string      `json:"raw_text"`
+		AiSummary   string      `json:"ai_summary,optional"`
+		Types       []string    `json:"types"`
+		EmotionData EmotionData `json:"emotion_data"`
+		CreatedAt   string      `json:"created_at"`
+		UpdatedAt   string      `json:"updated_at"`
+	}
+
+	// TODO 响应
+	TodoResponse {
+		Id          int64  `json:"id"`
+		NoteId      int64  `json:"note_id"`
+		UserId      int64  `json:"user_id"`
+		Title       string `json:"title"`
+		DueDate     string `json:"due_date,optional"`
+		Status      int    `json:"status"`
+		CreatedAt   string `json:"created_at"`
+		CompletedAt string `json:"completed_at,optional"`
+	}
+
+	// 记账响应
+	ExpenseResponse {
+		Id        int64   `json:"id"`
+		NoteId    int64   `json:"note_id"`
+		UserId    int64   `json:"user_id"`
+		Item      string  `json:"item"`
+		Amount    float64 `json:"amount"`
+		Category  string  `json:"category"`
+		CreatedAt string  `json:"created_at"`
+	}
+
+	// 创建笔记请求
+	CreateNoteRequest {
+		AvatarId int64  `json:"avatar_id,optional"`
+		RawText  string `json:"raw_text"`
+	}
+
+	// 创建笔记响应
+	CreateNoteResponse {
+		Id          int64       `json:"id"`
+		Types       []string    `json:"types"`
+		AiSummary   string      `json:"ai_summary,optional"`
+		EmotionData EmotionData `json:"emotion_data"`
+	}
+
+	// 获取笔记列表请求
+	GetNotesRequest {
+		Page     int      `form:"page,default=1"`
+		PageSize int      `form:"page_size,default=20"`
+		Types    []string `form:"types,optional"`
+	}
+
+	// 获取笔记列表响应
+	GetNotesResponse {
+		Total int64          `json:"total"`
+		List  []NoteResponse `json:"list"`
+	}
+
+	// 获取笔记详情请求
+	GetNoteDetailRequest {
+		Id int64 `path:"id"`
+	}
+
+	// 获取笔记详情响应
+	GetNoteDetailResponse {
+		Note     NoteResponse      `json:"note"`
+		Todos    []TodoResponse    `json:"todos"`
+		Expenses []ExpenseResponse `json:"expenses"`
+	}
+
+	// 更新笔记请求
+	UpdateNoteRequest {
+		Id      int64  `path:"id"`
+		RawText string `json:"raw_text"`
+	}
+
+	// 更新笔记响应
+	UpdateNoteResponse {
+		Success   bool     `json:"success"`
+		Types     []string `json:"types"`
+		AiSummary string   `json:"ai_summary,optional"`
+	}
+
+	// 删除笔记请求
+	DeleteNoteRequest {
+		Id int64 `path:"id"`
+	}
+
+	// 删除笔记响应
+	DeleteNoteResponse {
+		Success bool `json:"success"`
+	}
+
+	// 搜索笔记请求
+	SearchNotesRequest {
+		Query     string   `form:"query,optional"`
+		Types     []string `form:"types,optional"`
+		DateRange string   `form:"date_range,optional"` // today, yesterday, last_week, last_month
+		Limit     int      `form:"limit,default=20"`
+	}
+
+	// 搜索笔记响应
+	SearchNotesResponse {
+		List []NoteResponse `json:"list"`
+	}
+
+	// 获取 TODO 列表请求
+	GetTodosRequest {
+		Status   int `form:"status,default=-1"` // -1:全部 0:未完成 1:已完成
+		Page     int `form:"page,default=1"`
+		PageSize int `form:"page_size,default=20"`
+	}
+
+	// 获取 TODO 列表响应
+	GetTodosResponse {
+		Total int64          `json:"total"`
+		List  []TodoResponse `json:"list"`
+	}
+
+	// 更新 TODO 状态请求
+	UpdateTodoStatusRequest {
+		Id     int64 `path:"id"`
+		Status int   `json:"status"` // 0:未完成 1:已完成
+	}
+
+	// 更新 TODO 状态响应
+	UpdateTodoStatusResponse {
+		Success bool `json:"success"`
+	}
+
+	// 获取记账列表请求
+	GetExpensesRequest {
+		StartDate string `form:"start_date,optional"` // YYYY-MM-DD
+		EndDate   string `form:"end_date,optional"`   // YYYY-MM-DD
+		Category  string `form:"category,optional"`
+		Page      int    `form:"page,default=1"`
+		PageSize  int    `form:"page_size,default=20"`
+	}
+
+	// 获取记账列表响应
+	GetExpensesResponse {
+		Total       int64             `json:"total"`
+		TotalAmount float64           `json:"total_amount"`
+		List        []ExpenseResponse `json:"list"`
+	}
+
+	// 分类统计
+	CategoryStat {
+		Category string  `json:"category"`
+		Amount   float64 `json:"amount"`
+	}
+
+	// 每日支出
+	DailyExpense {
+		Date   string  `json:"date"`
+		Amount float64 `json:"amount"`
+	}
+
+	// 获取记账统计请求
+	GetExpenseStatsRequest {
+		StartDate string `form:"start_date,optional"` // YYYY-MM-DD
+		EndDate   string `form:"end_date,optional"`   // YYYY-MM-DD
+	}
+
+	// 获取记账统计响应
+	GetExpenseStatsResponse {
+		TotalAmount    float64        `json:"total_amount"`
+		CategoryStats  []CategoryStat `json:"category_stats"`
+		DailyExpenses  []DailyExpense `json:"daily_expenses"`
+	}
+)
+
+@server (
+	group:      note
+	prefix:     /api/v1/note
+	middleware: Auth
+)
+service gateway {
+	@doc "创建笔记"
+	@handler createNote
+	post / (CreateNoteRequest) returns (CreateNoteResponse)
+
+	@doc "获取笔记列表"
+	@handler getNotes
+	get /list (GetNotesRequest) returns (GetNotesResponse)
+
+	@doc "获取笔记详情"
+	@handler getNoteDetail
+	get /:id (GetNoteDetailRequest) returns (GetNoteDetailResponse)
+
+	@doc "更新笔记"
+	@handler updateNote
+	put /:id (UpdateNoteRequest) returns (UpdateNoteResponse)
+
+	@doc "删除笔记"
+	@handler deleteNote
+	delete /:id (DeleteNoteRequest) returns (DeleteNoteResponse)
+
+	@doc "搜索笔记"
+	@handler searchNotes
+	get /search (SearchNotesRequest) returns (SearchNotesResponse)
+
+	@doc "获取TODO列表"
+	@handler getTodos
+	get /todos (GetTodosRequest) returns (GetTodosResponse)
+
+	@doc "更新TODO状态"
+	@handler updateTodoStatus
+	put /todo/:id (UpdateTodoStatusRequest) returns (UpdateTodoStatusResponse)
+
+	@doc "获取记账列表"
+	@handler getExpenses
+	get /expenses (GetExpensesRequest) returns (GetExpensesResponse)
+
+	@doc "获取记账统计"
+	@handler getExpenseStats
+	get /expenses/stats (GetExpenseStatsRequest) returns (GetExpenseStatsResponse)
+}

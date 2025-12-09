@@ -88,6 +88,11 @@ type AvatarUploadTokenResponse struct {
 	Dir       string `json:"dir"`
 }
 
+type CategoryStat struct {
+	Category string  `json:"category"`
+	Amount   float64 `json:"amount"`
+}
+
 type CreateAvatarRequest struct {
 	Name          string `json:"name"`
 	AvatarUrl     string `json:"avatar_url,optional"`
@@ -95,6 +100,18 @@ type CreateAvatarRequest struct {
 	BirthDate     string `json:"birth_date"`     // 出生日期 YYYY-MM-DD
 	Occupation    string `json:"occupation"`     // 职业
 	MaritalStatus int64  `json:"marital_status"` // 婚姻状态 1:单身 2:恋爱中 3:已婚 4:其他
+}
+
+type CreateNoteRequest struct {
+	AvatarId int64  `json:"avatar_id,optional"`
+	RawText  string `json:"raw_text"`
+}
+
+type CreateNoteResponse struct {
+	Id          int64       `json:"id"`
+	Types       []string    `json:"types"`
+	AiSummary   string      `json:"ai_summary,optional"`
+	EmotionData EmotionData `json:"emotion_data"`
 }
 
 type CreateSessionRequest struct {
@@ -109,6 +126,19 @@ type CreateSessionResponse struct {
 type CreateUserDiaryRequest struct {
 	Content string `json:"content"`
 	Mood    string `json:"mood,optional"`
+}
+
+type DailyExpense struct {
+	Date   string  `json:"date"`
+	Amount float64 `json:"amount"`
+}
+
+type DeleteNoteRequest struct {
+	Id int64 `path:"id"`
+}
+
+type DeleteNoteResponse struct {
+	Success bool `json:"success"`
 }
 
 type DeleteSessionRequest struct {
@@ -149,6 +179,11 @@ type DiaryStatsResponse struct {
 	UserCount   int64 `json:"user_count"`
 }
 
+type EmotionData struct {
+	Primary string  `json:"primary"`
+	Score   float64 `json:"score"`
+}
+
 type EventListRequest struct {
 	Page     int `form:"page,default=1"`
 	PageSize int `form:"page_size,default=20"`
@@ -173,6 +208,16 @@ type EventResponse struct {
 	OccurredAt int64  `json:"occurred_at"`
 }
 
+type ExpenseResponse struct {
+	Id        int64   `json:"id"`
+	NoteId    int64   `json:"note_id"`
+	UserId    int64   `json:"user_id"`
+	Item      string  `json:"item"`
+	Amount    float64 `json:"amount"`
+	Category  string  `json:"category"`
+	CreatedAt string  `json:"created_at"`
+}
+
 type GetAvatarRequest struct {
 	Id int64 `path:"id"`
 }
@@ -183,6 +228,31 @@ type GetDiaryRequest struct {
 
 type GetEventRequest struct {
 	Id int64 `path:"id"`
+}
+
+type GetExpenseStatsRequest struct {
+	StartDate string `form:"start_date,optional"` // YYYY-MM-DD
+	EndDate   string `form:"end_date,optional"`   // YYYY-MM-DD
+}
+
+type GetExpenseStatsResponse struct {
+	TotalAmount   float64        `json:"total_amount"`
+	CategoryStats []CategoryStat `json:"category_stats"`
+	DailyExpenses []DailyExpense `json:"daily_expenses"`
+}
+
+type GetExpensesRequest struct {
+	StartDate string `form:"start_date,optional"` // YYYY-MM-DD
+	EndDate   string `form:"end_date,optional"`   // YYYY-MM-DD
+	Category  string `form:"category,optional"`
+	Page      int    `form:"page,default=1"`
+	PageSize  int    `form:"page_size,default=20"`
+}
+
+type GetExpensesResponse struct {
+	Total       int64             `json:"total"`
+	TotalAmount float64           `json:"total_amount"`
+	List        []ExpenseResponse `json:"list"`
 }
 
 type GetMapRequest struct {
@@ -198,6 +268,27 @@ type GetMessagesRequest struct {
 type GetMessagesResponse struct {
 	Messages []Message `json:"messages"`
 	Total    int64     `json:"total"`
+}
+
+type GetNoteDetailRequest struct {
+	Id int64 `path:"id"`
+}
+
+type GetNoteDetailResponse struct {
+	Note     NoteResponse      `json:"note"`
+	Todos    []TodoResponse    `json:"todos"`
+	Expenses []ExpenseResponse `json:"expenses"`
+}
+
+type GetNotesRequest struct {
+	Page     int      `form:"page,default=1"`
+	PageSize int      `form:"page_size,default=20"`
+	Types    []string `form:"types,optional"`
+}
+
+type GetNotesResponse struct {
+	Total int64          `json:"total"`
+	List  []NoteResponse `json:"list"`
 }
 
 type GetRegionRequest struct {
@@ -225,6 +316,17 @@ type GetSessionsRequest struct {
 type GetSessionsResponse struct {
 	Sessions []SessionInfo `json:"sessions"`
 	Total    int64         `json:"total"`
+}
+
+type GetTodosRequest struct {
+	Status   int `form:"status,default=-1"` // -1:全部 0:未完成 1:已完成
+	Page     int `form:"page,default=1"`
+	PageSize int `form:"page_size,default=20"`
+}
+
+type GetTodosResponse struct {
+	Total int64          `json:"total"`
+	List  []TodoResponse `json:"list"`
 }
 
 type LoginRequest struct {
@@ -257,6 +359,18 @@ type Message struct {
 	Role      string `json:"role"`
 	Content   string `json:"content"`
 	CreatedAt int64  `json:"created_at"`
+}
+
+type NoteResponse struct {
+	Id          int64       `json:"id"`
+	UserId      int64       `json:"user_id"`
+	AvatarId    int64       `json:"avatar_id,optional"`
+	RawText     string      `json:"raw_text"`
+	AiSummary   string      `json:"ai_summary,optional"`
+	Types       []string    `json:"types"`
+	EmotionData EmotionData `json:"emotion_data"`
+	CreatedAt   string      `json:"created_at"`
+	UpdatedAt   string      `json:"updated_at"`
 }
 
 type RegionListRequest struct {
@@ -315,6 +429,17 @@ type SceneRecommendationResponse struct {
 	Recommendations []SceneRecommendationItem `json:"recommendations"`
 }
 
+type SearchNotesRequest struct {
+	Query     string   `form:"query,optional"`
+	Types     []string `form:"types,optional"`
+	DateRange string   `form:"date_range,optional"` // today, yesterday, last_week, last_month
+	Limit     int      `form:"limit,default=20"`
+}
+
+type SearchNotesResponse struct {
+	List []NoteResponse `json:"list"`
+}
+
 type SendCodeRequest struct {
 	Phone string `json:"phone"`
 }
@@ -336,6 +461,17 @@ type SubscriptionResponse struct {
 	AutoRenew        bool  `json:"auto_renew"`
 }
 
+type TodoResponse struct {
+	Id          int64  `json:"id"`
+	NoteId      int64  `json:"note_id"`
+	UserId      int64  `json:"user_id"`
+	Title       string `json:"title"`
+	DueDate     string `json:"due_date,optional"`
+	Status      int    `json:"status"`
+	CreatedAt   string `json:"created_at"`
+	CompletedAt string `json:"completed_at,optional"`
+}
+
 type UpdateAvatarRequest struct {
 	Id            int64  `path:"id"`
 	Name          string `json:"name,optional"`
@@ -346,10 +482,30 @@ type UpdateAvatarRequest struct {
 	MaritalStatus int64  `json:"marital_status,optional"`
 }
 
+type UpdateNoteRequest struct {
+	Id      int64  `path:"id"`
+	RawText string `json:"raw_text"`
+}
+
+type UpdateNoteResponse struct {
+	Success   bool     `json:"success"`
+	Types     []string `json:"types"`
+	AiSummary string   `json:"ai_summary,optional"`
+}
+
 type UpdateSubscriptionRequest struct {
 	UserId           int64 `json:"user_id"`
 	SubscriptionTier int32 `json:"subscription_tier"`
 	ExpiresAt        int64 `json:"expires_at,optional"`
+}
+
+type UpdateTodoStatusRequest struct {
+	Id     int64 `path:"id"`
+	Status int   `json:"status"` // 0:未完成 1:已完成
+}
+
+type UpdateTodoStatusResponse struct {
+	Success bool `json:"success"`
 }
 
 type UpdateUserRequest struct {

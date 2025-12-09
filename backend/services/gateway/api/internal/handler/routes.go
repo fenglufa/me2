@@ -11,6 +11,7 @@ import (
 	dialogue "github.com/me2/gateway/api/internal/handler/dialogue"
 	diary "github.com/me2/gateway/api/internal/handler/diary"
 	event "github.com/me2/gateway/api/internal/handler/event"
+	note "github.com/me2/gateway/api/internal/handler/note"
 	user "github.com/me2/gateway/api/internal/handler/user"
 	world "github.com/me2/gateway/api/internal/handler/world"
 	"github.com/me2/gateway/api/internal/svc"
@@ -188,6 +189,75 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			}...,
 		),
 		rest.WithPrefix("/api/v1/events"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.Auth},
+			[]rest.Route{
+				{
+					// 创建笔记
+					Method:  http.MethodPost,
+					Path:    "/",
+					Handler: note.CreateNoteHandler(serverCtx),
+				},
+				{
+					// 获取笔记详情
+					Method:  http.MethodGet,
+					Path:    "/:id",
+					Handler: note.GetNoteDetailHandler(serverCtx),
+				},
+				{
+					// 更新笔记
+					Method:  http.MethodPut,
+					Path:    "/:id",
+					Handler: note.UpdateNoteHandler(serverCtx),
+				},
+				{
+					// 删除笔记
+					Method:  http.MethodDelete,
+					Path:    "/:id",
+					Handler: note.DeleteNoteHandler(serverCtx),
+				},
+				{
+					// 获取记账列表
+					Method:  http.MethodGet,
+					Path:    "/expenses",
+					Handler: note.GetExpensesHandler(serverCtx),
+				},
+				{
+					// 获取记账统计
+					Method:  http.MethodGet,
+					Path:    "/expenses/stats",
+					Handler: note.GetExpenseStatsHandler(serverCtx),
+				},
+				{
+					// 获取笔记列表
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: note.GetNotesHandler(serverCtx),
+				},
+				{
+					// 搜索笔记
+					Method:  http.MethodGet,
+					Path:    "/search",
+					Handler: note.SearchNotesHandler(serverCtx),
+				},
+				{
+					// 更新TODO状态
+					Method:  http.MethodPut,
+					Path:    "/todo/:id",
+					Handler: note.UpdateTodoStatusHandler(serverCtx),
+				},
+				{
+					// 获取TODO列表
+					Method:  http.MethodGet,
+					Path:    "/todos",
+					Handler: note.GetTodosHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1/note"),
 	)
 
 	server.AddRoutes(

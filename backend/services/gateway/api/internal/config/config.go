@@ -18,4 +18,5 @@ type Config struct {
 	ActionRpc   zrpc.RpcClientConf
 	DiaryRpc    zrpc.RpcClientConf
 	DialogueRpc zrpc.RpcClientConf
+	NoteRpc     zrpc.RpcClientConf
 }
