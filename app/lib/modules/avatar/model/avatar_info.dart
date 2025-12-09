@@ -7,16 +7,7 @@ class AvatarInfo {
   final String birthDate;
   final String occupation;
   final int maritalStatus;
-  final double warmth;
-  final double adventurous;
-  final double social;
-  final double creative;
-  final double calm;
-  final double energetic;
   final int createdAt;
-  final String personalityType;
-  final String personalityTypeName;
-  final String personalityTypeDescription;
 
   AvatarInfo({
     required this.id,
@@ -27,16 +18,7 @@ class AvatarInfo {
     required this.birthDate,
     required this.occupation,
     required this.maritalStatus,
-    required this.warmth,
-    required this.adventurous,
-    required this.social,
-    required this.creative,
-    required this.calm,
-    required this.energetic,
     required this.createdAt,
-    required this.personalityType,
-    required this.personalityTypeName,
-    required this.personalityTypeDescription,
   });
 
   factory AvatarInfo.fromJson(Map<String, dynamic> json) {
@@ -49,16 +31,7 @@ class AvatarInfo {
       birthDate: json['birth_date'] ?? '',
       occupation: json['occupation'] ?? '',
       maritalStatus: json['marital_status'] ?? 1,
-      warmth: (json['warmth'] ?? 0.0).toDouble() / 100,
-      adventurous: (json['adventurous'] ?? 0.0).toDouble() / 100,
-      social: (json['social'] ?? 0.0).toDouble() / 100,
-      creative: (json['creative'] ?? 0.0).toDouble() / 100,
-      calm: (json['calm'] ?? 0.0).toDouble() / 100,
-      energetic: (json['energetic'] ?? 0.0).toDouble() / 100,
       createdAt: json['created_at'] ?? 0,
-      personalityType: json['personality_type'] ?? '',
-      personalityTypeName: json['personality_type_name'] ?? '',
-      personalityTypeDescription: json['personality_type_description'] ?? '',
     );
   }
 
@@ -72,16 +45,7 @@ class AvatarInfo {
       'birth_date': birthDate,
       'occupation': occupation,
       'marital_status': maritalStatus,
-      'warmth': warmth,
-      'adventurous': adventurous,
-      'social': social,
-      'creative': creative,
-      'calm': calm,
-      'energetic': energetic,
       'created_at': createdAt,
-      'personality_type': personalityType,
-      'personality_type_name': personalityTypeName,
-      'personality_type_description': personalityTypeDescription,
     };
   }
 }

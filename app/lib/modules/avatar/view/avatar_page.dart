@@ -7,7 +7,6 @@ import 'package:image_picker/image_picker.dart';
 import '../controller/avatar_controller.dart';
 import '../../../core/utils/image_picker_service.dart';
 import '../service/avatar_oss_upload_service.dart';
-import '../widget/personality_radar_chart.dart';
 import '../../diary/controller/diary_controller.dart';
 
 class AvatarPage extends ConsumerStatefulWidget {
@@ -152,7 +151,6 @@ class _AvatarPageState extends ConsumerState<AvatarPage> {
             child: Column(
               children: [
                 _buildHeader(context, avatar),
-                _buildPersonalityCard(context, avatar),
                 const SizedBox(height: 16),
                 _buildDiarySection(context),
                 const SizedBox(height: 16),
@@ -430,111 +428,6 @@ class _AvatarPageState extends ConsumerState<AvatarPage> {
               context.push('/edit-avatar', extra: avatar.id);
             },
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPersonalityCard(BuildContext context, dynamic avatar) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                '人格面板',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              if (avatar.personalityTypeName.isNotEmpty)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.purple.shade400, Colors.purple.shade600],
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    avatar.personalityTypeName,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          if (avatar.personalityTypeDescription.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Text(
-              avatar.personalityTypeDescription,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          ],
-          const SizedBox(height: 16),
-          SizedBox(
-            height: 200,
-            child: PersonalityRadarChart(
-              warmth: avatar.warmth,
-              adventurous: avatar.adventurous,
-              social: avatar.social,
-              creative: avatar.creative,
-              calm: avatar.calm,
-              energetic: avatar.energetic,
-            ),
-          ),
-          const SizedBox(height: 16),
-          _buildPersonalityItem('温暖度', avatar.warmth, Colors.red),
-          _buildPersonalityItem('冒险性', avatar.adventurous, Colors.orange),
-          _buildPersonalityItem('社交性', avatar.social, Colors.blue),
-          _buildPersonalityItem('创造力', avatar.creative, Colors.purple),
-          _buildPersonalityItem('平静度', avatar.calm, Colors.green),
-          _buildPersonalityItem('活力值', avatar.energetic, Colors.pink),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPersonalityItem(String label, double value, Color color) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 60,
-            child: Text(label, style: const TextStyle(fontSize: 12)),
-          ),
-          Expanded(
-            child: LinearProgressIndicator(
-              value: value,
-              backgroundColor: Colors.grey.shade200,
-              valueColor: AlwaysStoppedAnimation(color),
-              minHeight: 8,
-              borderRadius: BorderRadius.circular(4),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text('${(value * 100).toInt()}', style: const TextStyle(fontSize: 12)),
         ],
       ),
     );
