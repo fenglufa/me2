@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../home/view/home_page.dart';
 import '../../avatar/view/avatar_page.dart';
-import '../../world/view/world_page.dart';
+// import '../../world/view/world_page.dart';
 import '../../profile/view/profile_page.dart';
 
 class MainPage extends StatefulWidget {
@@ -17,7 +17,7 @@ class _MainPageState extends State<MainPage> {
   final List<Widget> _pages = const [
     HomePage(),
     AvatarPage(),
-    WorldPage(),
+    // WorldPage(),
     ProfilePage(),
   ];
 
@@ -42,11 +42,11 @@ class _MainPageState extends State<MainPage> {
             activeIcon: Icon(Icons.person),
             label: '分身',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.explore_outlined),
-            activeIcon: Icon(Icons.explore),
-            label: '世界',
-          ),
+          // BottomNavigationBarItem(
+          //   icon: Icon(Icons.explore_outlined),
+          //   activeIcon: Icon(Icons.explore),
+          //   label: '世界',
+          // ),
           BottomNavigationBarItem(
             icon: Icon(Icons.account_circle_outlined),
             activeIcon: Icon(Icons.account_circle),

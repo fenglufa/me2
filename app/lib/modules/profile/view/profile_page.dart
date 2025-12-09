@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 import '../../user/controller/user_controller.dart';
-import '../../diary/controller/diary_controller.dart';
-import '../../diary/view/diary_detail_page.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
@@ -22,18 +20,12 @@ class ProfilePage extends ConsumerWidget {
                 _buildHeader(context, userInfo.nickname, userInfo.avatarUrl),
                 const SizedBox(height: 16),
                 _buildSubscriptionCard(context, userInfo.subscriptionTier),
-                const SizedBox(height: 16),
-                _buildDiaryTabs(context, ref),
               ],
             ),
           ),
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, stack) => Center(child: Text('加载失败: $error')),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showCreateDiaryDialog(context, ref),
-        child: const Icon(Icons.add),
       ),
     );
   }
@@ -131,201 +123,6 @@ class ProfilePage extends ConsumerWidget {
               minimumSize: const Size(double.infinity, 40),
             ),
             child: const Text('立即升级'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDiaryTabs(BuildContext context, WidgetRef ref) {
-    return DefaultTabController(
-      length: 2,
-      child: Column(
-        children: [
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: TabBar(
-              indicator: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              labelColor: Colors.black87,
-              unselectedLabelColor: Colors.grey.shade600,
-              tabs: const [
-                Tab(text: '我的日记'),
-                Tab(text: '分身日记'),
-              ],
-            ),
-          ),
-          SizedBox(
-            height: 400,
-            child: TabBarView(
-              children: [
-                _buildUserDiaryList(ref),
-                _buildAvatarDiaryList(ref),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildUserDiaryList(WidgetRef ref) {
-    final diariesAsync = ref.watch(userDiariesProvider);
-    return diariesAsync.when(
-      data: (response) => _buildDiaryList(response.list),
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('加载失败: $error')),
-    );
-  }
-
-  Widget _buildAvatarDiaryList(WidgetRef ref) {
-    final diariesAsync = ref.watch(avatarDiariesProvider);
-    return diariesAsync.when(
-      data: (response) => _buildDiaryList(response.list),
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('加载失败: $error')),
-    );
-  }
-
-  Widget _buildDiaryList(List<dynamic> diaries) {
-    if (diaries.isEmpty) {
-      return const Center(child: Text('暂无日记'));
-    }
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: diaries.length,
-      itemBuilder: (context, index) {
-        final diary = diaries[index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => DiaryDetailPage(diaryId: diary.id),
-                ),
-              );
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        diary.title.isEmpty ? '无标题' : diary.title,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        diary.date,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    diary.content,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade700,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  void _showCreateDiaryDialog(BuildContext context, WidgetRef ref) {
-    final contentController = TextEditingController();
-    final moodController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('写日记'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: contentController,
-                decoration: const InputDecoration(
-                  labelText: '内容',
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 5,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: moodController,
-                decoration: const InputDecoration(
-                  labelText: '心情（可选）',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
-          ),
-          TextButton(
-            onPressed: () async {
-              if (contentController.text.trim().isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('请输入日记内容')),
-                );
-                return;
-              }
-
-              Navigator.pop(context);
-
-              try {
-                final diaryService = ref.read(diaryServiceProvider);
-                await diaryService.createUserDiary(
-                  content: contentController.text.trim(),
-                  mood: moodController.text.trim(),
-                );
-
-                ref.invalidate(userDiariesProvider);
-
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('日记创建成功')),
-                  );
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('创建失败: $e')),
-                  );
-                }
-              }
-            },
-            child: const Text('保存'),
           ),
         ],
       ),
