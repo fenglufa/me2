@@ -41,7 +41,9 @@
       "Bash(flutter pub run build_runner:*)",
       "Bash(curl:*)",
       "Bash(pod install:*)",
-      "Bash(goctl api go:*)"
+      "Bash(goctl api go:*)",
+      "Bash(./test-note.sh check:*)",
+      "Bash(./test-note.sh:*)"
     ],
     "deny": [],
     "ask": []

@@ -14,6 +14,7 @@ type (
 	NoteExpenseModel interface {
 		Insert(expense *NoteExpense) (sql.Result, error)
 		FindByUserId(userId int64, startDate, endDate, category string, page, pageSize int32) ([]*NoteExpense, error)
+		FindByNoteId(noteId int64) ([]*NoteExpense, error)
 		Count(userId int64, startDate, endDate, category string) (int64, error)
 		SumAmount(userId int64, startDate, endDate string) (float64, error)
 		StatsByCategory(userId int64, startDate, endDate string) (map[string]float64, error)
@@ -79,6 +80,16 @@ func (m *customNoteExpenseModel) FindByUserId(userId int64, startDate, endDate, 
 	args = append(args, pageSize, offset)
 
 	err := m.conn.QueryRows(&expenses, query, args...)
+	return expenses, err
+}
+
+// FindByNoteId 根据笔记ID查询记账列表
+func (m *customNoteExpenseModel) FindByNoteId(noteId int64) ([]*NoteExpense, error) {
+	var expenses []*NoteExpense
+	query := `SELECT id, note_id, user_id, item, amount, category, created_at
+              FROM note_expenses WHERE note_id = ?
+              ORDER BY created_at ASC`
+	err := m.conn.QueryRows(&expenses, query, noteId)
 	return expenses, err
 }
 

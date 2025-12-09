@@ -14,6 +14,7 @@ type (
 	NoteTodoModel interface {
 		Insert(todo *NoteTodo) (sql.Result, error)
 		FindByUserId(userId int64, status int32, page, pageSize int32) ([]*NoteTodo, error)
+		FindByNoteId(noteId int64) ([]*NoteTodo, error)
 		Count(userId int64, status int32) (int64, error)
 		UpdateStatus(id, userId int64, status int32) error
 		DeleteByNoteId(noteId int64) error
@@ -74,6 +75,16 @@ func (m *customNoteTodoModel) FindByUserId(userId int64, status int32, page, pag
 	args = append(args, pageSize, offset)
 
 	err := m.conn.QueryRows(&todos, query, args...)
+	return todos, err
+}
+
+// FindByNoteId 根据笔记ID查询TODO列表
+func (m *customNoteTodoModel) FindByNoteId(noteId int64) ([]*NoteTodo, error) {
+	var todos []*NoteTodo
+	query := `SELECT id, note_id, user_id, title, due_date, status, created_at, completed_at
+              FROM note_todos WHERE note_id = ?
+              ORDER BY created_at ASC`
+	err := m.conn.QueryRows(&todos, query, noteId)
 	return todos, err
 }
 

@@ -6,18 +6,20 @@ Note Service 是 Me2 项目的笔记管理服务，提供笔记的创建、查�
 
 ## 功能特性
 
-### MVP Phase 1 （已完成基础框架）
+### MVP Phase 1 （✅ 已完成）
 - ✅ 笔记 CRUD（创建、查询、更新、删除）
 - ✅ 数据库模型（notes, note_todos, note_expenses）
 - ✅ RPC 服务框架
 - ✅ 简单分类（基于关键词）
+- ✅ TODO 管理完整功能
+- ✅ 记账统计功能
+- ✅ 笔记检索（用于对话集成）
 
 ### Phase 2 （待实现）
 - ⏸ AI 智能分类（调用 AI Service）
-- ⏸ 情绪分析
-- ⏸ TODO 管理完整功能
-- ⏸ 记账统计功能
-- ⏸ 笔记检索（用于对话集成）
+- ⏸ 情绪分析增强
+- ⏸ 自动提取 TODO 和记账信息
+- ⏸ 生成摘要
 
 ## 目录结构
 
@@ -35,15 +37,16 @@ note/
 │   │   ├── config/      # 配置结构
 │   │   ├── logic/       # 业务逻辑
 │   │   │   ├── create_note_logic.go         ✅ 已实现
-│   │   │   ├── get_notes_logic.go           ⏸ 待实现
-│   │   │   ├── get_note_detail_logic.go     ⏸ 待实现
-│   │   │   ├── update_note_logic.go         ⏸ 待实现
-│   │   │   ├── delete_note_logic.go         ⏸ 待实现
-│   │   │   ├── search_notes_logic.go        ⏸ 待实现
-│   │   │   ├── get_todos_logic.go           ⏸ 待实现
-│   │   │   ├── update_todo_status_logic.go  ⏸ 待实现
-│   │   │   ├── get_expenses_logic.go        ⏸ 待实现
-│   │   │   └── get_expense_stats_logic.go   ⏸ 待实现
+│   │   │   ├── get_notes_logic.go           ✅ 已实现
+│   │   │   ├── get_note_detail_logic.go     ✅ 已实现
+│   │   │   ├── update_note_logic.go         ✅ 已实现
+│   │   │   ├── delete_note_logic.go         ✅ 已实现
+│   │   │   ├── search_notes_logic.go        ✅ 已实现
+│   │   │   ├── get_todos_logic.go           ✅ 已实现
+│   │   │   ├── update_todo_status_logic.go  ✅ 已实现
+│   │   │   ├── get_expenses_logic.go        ✅ 已实现
+│   │   │   ├── get_expense_stats_logic.go   ✅ 已实现
+│   │   │   └── note_helper.go               ✅ 已实现（共享辅助函数）
 │   │   ├── model/       # 数据模型
 │   │   │   ├── note_model.go                ✅ 已完成
 │   │   │   ├── note_todo_model.go           ✅ 已完成
@@ -198,94 +201,163 @@ rpc CreateNote(CreateNoteRequest) returns (CreateNoteResponse);
 - 自动提取记账信息
 - 生成摘要
 
-### GetNotes - 获取笔记列表 ⏸
+### GetNotes - 获取笔记列表 ✅
 ```protobuf
 rpc GetNotes(GetNotesRequest) returns (GetNotesResponse);
 ```
 
-### GetNoteDetail - 获取笔记详情 ⏸
+**已实现功能**：
+- 分页查询（支持自定义 page 和 page_size）
+- 类型过滤（可按笔记类型筛选）
+- 按创建时间倒序排列
+- 统计总数
+
+### GetNoteDetail - 获取笔记详情 ✅
 ```protobuf
 rpc GetNoteDetail(GetNoteDetailRequest) returns (GetNoteDetailResponse);
 ```
 
-### SearchNotes - 搜索笔记 ⏸
+**已实现功能**：
+- 获取笔记完整信息
+- 包含关联的 TODO 列表
+- 包含关联的记账记录
+- 权限验证
+
+### SearchNotes - 搜索笔记 ✅
 ```protobuf
 rpc SearchNotes(SearchNotesRequest) returns (SearchNotesResponse);
 ```
 
-**说明**：此接口用于对话服务集成，允许分身检索用户笔记。
+**已实现功能**：
+- 关键词搜索（全文检索）
+- 时间范围过滤（today, yesterday, last_week, last_month）
+- 类型过滤
+- 用于对话服务集成
 
-### 其他接口 ⏸
-- UpdateNote
-- DeleteNote
-- GetTodos
-- UpdateTodoStatus
-- GetExpenses
-- GetExpenseStats
+### UpdateNote - 更新笔记 ✅
+```protobuf
+rpc UpdateNote(UpdateNoteRequest) returns (UpdateNoteResponse);
+```
+
+**已实现功能**：
+- 更新笔记内容
+- 重新分类
+- 权限验证
+
+### DeleteNote - 删除笔记 ✅
+```protobuf
+rpc DeleteNote(DeleteNoteRequest) returns (DeleteNoteResponse);
+```
+
+**已实现功能**：
+- 删除笔记
+- 级联删除关联的 TODO
+- 级联删除关联的记账记录
+- 权限验证
+
+### GetTodos - 获取 TODO 列表 ✅
+```protobuf
+rpc GetTodos(GetTodosRequest) returns (GetTodosResponse);
+```
+
+**已实现功能**：
+- 分页查询
+- 状态过滤（全部/-1，未完成/0，已完成/1）
+- 统计总数
+
+### UpdateTodoStatus - 更新 TODO 状态 ✅
+```protobuf
+rpc UpdateTodoStatus(UpdateTodoStatusRequest) returns (UpdateTodoStatusResponse);
+```
+
+**已实现功能**：
+- 更新状态
+- 自动记录完成时间
+- 权限验证
+
+### GetExpenses - 获取记账列表 ✅
+```protobuf
+rpc GetExpenses(GetExpensesRequest) returns (GetExpensesResponse);
+```
+
+**已实现功能**：
+- 分页查询
+- 日期范围过滤
+- 分类过滤
+- 统计总数和总金额
+
+### GetExpenseStats - 获取记账统计 ✅
+```protobuf
+rpc GetExpenseStats(GetExpenseStatsRequest) returns (GetExpenseStatsResponse);
+```
+
+**已实现功能**：
+- 统计总金额
+- 按分类统计
+- 日期范围过滤
 
 ## 当前状态
 
-### ✅ 已完成
+### ✅ 已完成（MVP Phase 1）
+
 1. **项目框架**
    - RPC 服务结构
-   - Proto 定义
+   - Proto 定义（10个RPC接口）
    - Makefile 构建脚本
    - 配置文件
+   - 编译通过
 
 2. **数据库设计**
    - 笔记主表设计和 Model
    - TODO 表设计和 Model
    - 记账表设计和 Model
    - 索引优化
+   - FindByNoteId 方法增强
 
-3. **核心逻辑**
-   - CreateNote 基础实现（无 AI）
-   - Service Context 依赖注入
+3. **笔记管理功能**
+   - CreateNote - 创建笔记
+   - GetNotes - 获取笔记列表（分页、过滤）
+   - GetNoteDetail - 获取笔记详情（含TODO和记账）
+   - UpdateNote - 更新笔记
+   - DeleteNote - 删除笔记（级联删除）
+   - SearchNotes - 搜索笔记（全文检索、时间范围）
 
-### ⏸ 待实现（按优先级）
+4. **TODO 管理功能**
+   - GetTodos - 获取TODO列表（分页、状态过滤）
+   - UpdateTodoStatus - 更新TODO状态
 
-#### 高优先级（MVP 完善）
-1. **get_notes_logic.go** - 获取笔记列表
-   - 分页查询
-   - 类型过滤
-   - 时间排序
+5. **记账管理功能**
+   - GetExpenses - 获取记账列表（分页、日期范围、分类过滤）
+   - GetExpenseStats - 获取记账统计（总金额、分类统计）
 
-2. **search_notes_logic.go** - 搜索笔记
-   - 关键词搜索
-   - 时间范围过滤
-   - 类型过滤
+6. **辅助功能**
+   - 共享 JSON 解析函数（note_helper.go）
+   - 完善的参数验证
+   - 权限控制
+   - 错误日志记录
 
-3. **update_note_logic.go** - 更新笔记
-4. **delete_note_logic.go** - 删除笔记
+### ⏸ 待实现（Phase 2 - AI 增强）
 
-#### 中优先级（功能扩展）
-5. **AI 分类集成**
+1. **AI 智能分类**
    - 创建 ai_classifier.go
-   - 调用 AI Service 进行分类
-   - 情绪分析
+   - 调用 AI Service 进行智能分类
+   - 情绪分析增强
    - 自动生成摘要
 
-6. **TODO 功能**
-   - get_todos_logic.go
-   - update_todo_status_logic.go
-   - 从笔记中提取 TODO
+2. **自动信息提取**
+   - 从笔记中自动提取 TODO
+   - 从笔记中自动提取记账信息
+   - 智能识别日期、金额、类别
 
-7. **记账功能**
-   - get_expenses_logic.go
-   - get_expense_stats_logic.go
-   - 从笔记中提取记账信息
-   - 统计分析
+3. **高级统计**
+   - 每日支出趋势图数据
+   - 情绪变化趋势
+   - 笔记类型分布统计
 
-#### 低优先级（优化）
-8. **性能优化**
+4. **性能优化**
    - Redis 缓存
    - 全文搜索优化
-   - 批量操作
-
-9. **高级功能**
-   - 笔记标签
-   - 笔记分类
-   - 笔记导出
+   - 批量操作优化
 
 ## 实现示例
 
@@ -314,24 +386,6 @@ resp, err := noteClient.CreateNote(ctx, &note.CreateNoteRequest{
 //   ai_summary: "记录了心情和消费",
 //   emotion_data: {primary: "happy", score: 0.8}
 // }
-```
-
-### 获取笔记列表（待实现）
-
-```go
-// 实现参考
-func (l *GetNotesLogic) GetNotes(in *note.GetNotesRequest) (*note.GetNotesResponse, error) {
-    // 1. 参数验证
-    // 2. 调用 Model 查询
-    notes, err := l.svcCtx.NoteModel.FindByUserId(
-        in.UserId,
-        in.Page,
-        in.PageSize,
-        in.Types,
-    )
-    // 3. 统计总数
-    // 4. 转换并返回
-}
 ```
 
 ## 开发规范
